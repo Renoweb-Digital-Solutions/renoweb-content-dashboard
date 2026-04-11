@@ -3,29 +3,24 @@ export const AUTHORS = [
         id: "gourab",
         name: "Gourab Majumder",
         role: "Founder & CEO, Renoweb Digital Solutions",
-        bio: "Gourab Majumder is a B2B consultant, business mentor specializing in SaaS growth, content strategy, CX, and data-driven innovation.",
+        bio: "Gourab Majumder is a B2B consultant, business mentor specializing in SaaS growth, content strategy, CX, and data-driven innovation for digital businesses.",
         image: null,
         social: {
             linkedin: "https://www.linkedin.com/in/gourabmajumderofficial-marketingmaestro/",
-            email: "gourab@renoweb.com",
+            email: "gourab@renoweb.com"
         },
     },
     {
-        id: "sarah",
-        name: "Sarah Chen",
-        role: "Head of Growth, Renoweb Digital Solutions",
-        bio: "Sarah specializes in performance marketing, paid acquisition, and data-driven growth strategies.",
+        id: "samaresh",
+        name: "Samaresh Das",
+        role: "Head of Software Development, Renoweb Digital Solutions",
+        bio: "Samaresh Das is a MERN stack developer with expertise in front-end development, React.js, and modern JavaScript. He develops responsive, user-centric web applications optimized for real-world use.",
         image: null,
-        social: { linkedin: "", email: "sarah@renoweb.com" },
-    },
-    {
-        id: "arjun",
-        name: "Arjun Sharma",
-        role: "SEO & Content Lead, Renoweb Digital Solutions",
-        bio: "Arjun drives organic growth through technical SEO, content frameworks, and conversion-focused copywriting.",
-        image: null,
-        social: { linkedin: "", email: "arjun@renoweb.com" },
-    },
+        "social": {
+            "linkedin": "https://www.linkedin.com/in/samaresh-d-ab9621212/",
+            "email": "samareshmail679@gmail.com"
+        }
+    }
 ];
 
 export const CATEGORIES = [
@@ -56,4 +51,13 @@ export const initCaseStudyForm = () => ({
     coAuthor: null,
     bannerFile: null,
     bannerPreview: null,
+    uiux_issues: [
+        { id: "", title: "", description: "", beforeCaption: "", beforeImageFile: null, beforeImagePreview: null }
+    ],
+    website_issues: [],
+    results_conclusion: "",
+    beforeAfterShowcase: {
+        before: { imageFile: null, imagePreview: null, caption: "" },
+        after: { imageFile: null, imagePreview: null, caption: "" },
+    },
 });

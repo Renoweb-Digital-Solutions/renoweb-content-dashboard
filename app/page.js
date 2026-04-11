@@ -42,7 +42,7 @@ export default function Home() {
       const requiredChecks = [
         form.category,
         form.title,
-        form.bannerPreview,
+        // form.bannerPreview,
         form.about_client,
         form.challenges.some(Boolean),
         form.solutions.approach,
@@ -94,6 +94,52 @@ export default function Home() {
         bannerUrl = data.publicUrl;
       }
 
+      // ── UI/UX ISSUE SCREENSHOTS ──────────────────────────────
+      const uiuxIssues = await Promise.all(
+        (form.uiux_issues || []).map(async (issue) => {
+          if (!issue.beforeImageFile || !issue.id) return issue;
+
+          const fileExt = issue.beforeImageFile.name.split(".").pop();
+          const fileName = `case-studies/${form.id}_${issue.id}.${fileExt}`;
+
+          const { error } = await supabase.storage
+            .from("contentimages")
+            .upload(fileName, issue.beforeImageFile, { upsert: true });
+
+          if (error) throw error;
+
+          const { data } = supabase.storage.from("contentimages").getPublicUrl(fileName);
+          return { ...issue, beforeImage: data.publicUrl };
+        })
+      );
+
+      // ── BEFORE / AFTER SHOWCASE IMAGES ──────────────────────────────
+      const showcase = form.beforeAfterShowcase || {};
+      let beforeUrl = "";
+      let afterUrl = "";
+
+      if (showcase.before?.imageFile) {
+        const ext = showcase.before.imageFile.name.split(".").pop();
+        const fileName = `case-studies/${form.id}_before.${ext}`;
+        const { error } = await supabase.storage
+          .from("contentimages")
+          .upload(fileName, showcase.before.imageFile, { upsert: true });
+        if (error) throw error;
+        const { data } = supabase.storage.from("contentimages").getPublicUrl(fileName);
+        beforeUrl = data.publicUrl;
+      }
+
+      if (showcase.after?.imageFile) {
+        const ext = showcase.after.imageFile.name.split(".").pop();
+        const fileName = `case-studies/${form.id}_after.${ext}`;
+        const { error } = await supabase.storage
+          .from("contentimages")
+          .upload(fileName, showcase.after.imageFile, { upsert: true });
+        if (error) throw error;
+        const { data } = supabase.storage.from("contentimages").getPublicUrl(fileName);
+        afterUrl = data.publicUrl;
+      }
+
       // ── PAYLOAD ─────────────────────────────────
       const payload = {
         id: form.id,
@@ -104,6 +150,24 @@ export default function Home() {
         solutions: {
           approach: form.solutions.approach,
           process: form.solutions.process.filter(Boolean),
+        },
+        // replace uiux_issues in payload:
+        uiux_issues: uiuxIssues
+          .filter((i) => i.title || i.description)
+          .map(({ beforeImageFile, beforeImagePreview, ...rest }) => rest),
+
+        // add alongside other fields:
+        website_issues: form.website_issues || [],
+        results_conclusion: form.results_conclusion || "",
+        beforeAfterShowcase: {
+          before: {
+            image: beforeUrl || showcase.before?.image || "",
+            caption: showcase.before?.caption || "",
+          },
+          after: {
+            image: afterUrl || showcase.after?.image || "",
+            caption: showcase.after?.caption || "",
+          },
         },
         conclusion: form.conclusion,
         takeaway: form.takeaway,

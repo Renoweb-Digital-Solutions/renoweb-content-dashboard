@@ -6,13 +6,47 @@ import { useState } from "react";
 export default function JsonModal({ data, onClose }) {
     const [copied, setCopied] = useState(false);
 
+    // Strip all File objects and base64 previews — only store URLs in the DB
     const exportData = {
         ...data,
-        bannerFile: data.bannerFile ? "[FILE_OBJECT — will be uploaded to Firebase]" : null,
-        bannerPreview: data.bannerPreview ? "[BASE64_PREVIEW — not stored in JSON]" : null,
+        // Banner
+        bannerFile: undefined,
+        bannerPreview: data.bannerPreview ? "[BASE64_PREVIEW — not stored in JSON]" : undefined,
+
+        // UI/UX issues — strip image files/previews
+        uiux_issues: (data.uiux_issues || [])
+            .filter((i) => i.title || i.description)
+            .map(({ beforeImageFile, beforeImagePreview, ...rest }) => ({
+                ...rest,
+                beforeImage: rest.id ? `/case_studies/${data.id}_${rest.id}.png` : undefined,
+            })),
+
+        // Before/After — strip image files/previews
+        beforeAfterShowcase: data.beforeAfterShowcase
+            ? {
+                before: {
+                    image: data.beforeAfterShowcase.before?.imagePreview
+                        ? `/case_studies/${data.id}_home_before.png`
+                        : undefined,
+                    caption: data.beforeAfterShowcase.before?.caption || undefined,
+                },
+                after: {
+                    image: data.beforeAfterShowcase.after?.imagePreview
+                        ? `/case_studies/${data.id}_home_after.png`
+                        : undefined,
+                    caption: data.beforeAfterShowcase.after?.caption || undefined,
+                },
+            }
+            : undefined,
+
+        // Results
+        results_conclusion: data.results_conclusion || undefined,
+        website_issues: (data.website_issues || []).length > 0 ? data.website_issues : undefined,
     };
 
-    const json = JSON.stringify(exportData, null, 2);
+    // Remove undefined keys for clean output
+    const cleanData = JSON.parse(JSON.stringify(exportData, (_, v) => v === undefined ? undefined : v));
+    const json = JSON.stringify(cleanData, null, 2);
 
     const handleCopy = () => {
         navigator.clipboard.writeText(json);
@@ -54,8 +88,8 @@ export default function JsonModal({ data, onClose }) {
                         <button
                             onClick={handleCopy}
                             className={`px-4 py-2 text-sm rounded-lg font-semibold transition ${copied
-                                    ? "bg-green-600/20 border border-green-600/40 text-green-400"
-                                    : "bg-blue-600/20 border border-blue-600/40 text-blue-400 hover:bg-blue-600/30"
+                                ? "bg-green-600/20 border border-green-600/40 text-green-400"
+                                : "bg-blue-600/20 border border-blue-600/40 text-blue-400 hover:bg-blue-600/30"
                                 }`}
                         >
                             {copied ? "Copied ✓" : "Copy JSON"}

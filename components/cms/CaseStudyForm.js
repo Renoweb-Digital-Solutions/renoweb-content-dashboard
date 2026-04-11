@@ -1,11 +1,14 @@
 "use client";
 
-
 // components/cms/CaseStudyForm.js
 import { CATEGORIES, slugify } from "../constants";
 import AuthorSelector from "./AuthorSelector";
 import BannerUploader from "./BannerUploader";
+import BeforeAfterEditor from "./Beforeaftereditor";
+
 import { Field, ListEditor, Section } from "./FormPrimitives";
+import ResultsEditor from "./Resultseditor";
+import UiUxIssuesEditor from "./Uiuxissueseditor";
 
 
 export default function CaseStudyForm({ form, setForm, onReset }) {
@@ -103,6 +106,17 @@ export default function CaseStudyForm({ form, setForm, onReset }) {
                 />
             </Section>
 
+            {/* ── UI/UX ISSUES ── OPTIONAL ────────────────────────────────── */}
+            <Section title="UI/UX & Content Issues — Documented">
+                <p className="text-[11px] text-gray-600 -mt-1 mb-1">
+                    Optional — document specific UI/UX problems with screenshots. Great for Dev OS case studies.
+                </p>
+                <UiUxIssuesEditor
+                    issues={form.uiux_issues || [{ id: "", title: "", description: "", beforeCaption: "", beforeImageFile: null, beforeImagePreview: null }]}
+                    onChange={(v) => set("uiux_issues", v)}
+                />
+            </Section>
+
             {/* ── SOLUTIONS ──────────────────────────────────────────────── */}
             <Section title="Solutions">
                 <Field
@@ -140,6 +154,35 @@ export default function CaseStudyForm({ form, setForm, onReset }) {
                     value={form.takeaway}
                     onChange={(v) => set("takeaway", v)}
                     placeholder="The one-line lesson from this case study…"
+                />
+            </Section>
+
+            {/* ── RESULTS STATS ── OPTIONAL ───────────────────────────────── */}
+            <Section title="Results — Stats & Metrics">
+                <p className="text-[11px] text-gray-600 -mt-1 mb-1">
+                    Optional — add quantified stats shown as metric cards in the results section.
+                </p>
+                <ResultsEditor
+                    results={{
+                        conclusion_text: form.results_conclusion || "",
+                        website_issues: form.website_issues || [],
+                    }}
+                    onChange={(v) => setForm((f) => ({
+                        ...f,
+                        results_conclusion: v.conclusion_text,
+                        website_issues: v.website_issues,
+                    }))}
+                />
+            </Section>
+
+            {/* ── BEFORE / AFTER SHOWCASE ── OPTIONAL ─────────────────────── */}
+            <Section title="Before & After Showcase">
+                <p className="text-[11px] text-gray-600 -mt-1 mb-1">
+                    Optional — full-page before/after screenshots for the visual transformation section.
+                </p>
+                <BeforeAfterEditor
+                    showcase={form.beforeAfterShowcase || { before: {}, after: {} }}
+                    onChange={(v) => set("beforeAfterShowcase", v)}
                 />
             </Section>
 
