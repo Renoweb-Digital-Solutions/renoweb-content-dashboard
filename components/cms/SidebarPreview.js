@@ -5,7 +5,7 @@
 const CHECK_ITEMS = [
     ["Category", (f) => !!f.category],
     ["Title", (f) => !!f.title],
-    ["Banner Image", (f) => !!f.bannerPreview],
+    // ["Banner Image", (f) => !!f.bannerPreview],
     ["About Client", (f) => !!f.about_client],
     ["Challenges", (f) => f.challenges.some(Boolean)],
     ["Solution Approach", (f) => !!f.solutions.approach],

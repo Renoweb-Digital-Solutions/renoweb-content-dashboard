@@ -1,19 +1,48 @@
 "use client";
 
-// components/cms/CMSNavbar.js
+import { useState } from "react";
 
-const NavTab = ({ label, active, onClick }) => (
-    <button
-        onClick={onClick}
-        className={`relative px-5 py-2 text-sm font-semibold tracking-wide transition-all duration-200 ${active ? "text-white" : "text-gray-500 hover:text-gray-300"
-            }`}
-    >
-        {label}
-        {active && (
-            <span className="absolute bottom-0 left-0 right-0 h-[2px] bg-blue-600 rounded-full" />
-        )}
-    </button>
-);
+const NavDropdown = ({ label, active, onClick, items }) => {
+    const [open, setOpen] = useState(false);
+
+    return (
+        <div
+            className="relative"
+            onMouseEnter={() => setOpen(true)}
+            onMouseLeave={() => setOpen(false)}
+        >
+            {/* Parent tab */}
+            <button
+                onClick={onClick}
+                className={`relative px-5 py-2 text-sm font-semibold tracking-wide transition-all duration-200 ${active ? "text-white" : "text-gray-500 hover:text-gray-300"
+                    }`}
+            >
+                {label}
+                {active && (
+                    <span className="absolute bottom-0 left-0 right-0 h-[2px] bg-blue-600 rounded-full" />
+                )}
+            </button>
+
+            {/* Dropdown */}
+            <div
+                className={`absolute left-0 mt-2 w-52 bg-black border border-gray-800 rounded-xl shadow-xl transition-all duration-200 ${open ? "opacity-100 visible translate-y-0" : "opacity-0 invisible -translate-y-2"
+                    }`}
+            >
+                <div className="py-2">
+                    {items.map((item, i) => (
+                        <button
+                            key={i}
+                            onClick={item.onClick}
+                            className="w-full text-left px-4 py-2 text-xs text-gray-400 hover:text-white hover:bg-gray-900 transition"
+                        >
+                            {item.label}
+                        </button>
+                    ))}
+                </div>
+            </div>
+        </div>
+    );
+};
 
 export default function CMSNavbar({ activeTab, setActiveTab, isSaved }) {
     return (
@@ -33,17 +62,48 @@ export default function CMSNavbar({ activeTab, setActiveTab, isSaved }) {
                     </span>
                 </div>
 
-                {/* Nav tabs */}
-                <nav className="flex items-center gap-1">
-                    <NavTab label="Case Studies" active={activeTab === "case-studies"} onClick={() => setActiveTab("case-studies")} />
-                    <NavTab label="Blogs" active={activeTab === "blogs"} onClick={() => setActiveTab("blogs")} />
-                    <NavTab label="Research Hub" active={activeTab === "research"} onClick={() => setActiveTab("research")} />
+                {/* Nav with dropdowns */}
+                <nav className="flex items-center gap-2">
+
+                    <NavDropdown
+                        label="Case Studies"
+                        active={activeTab === "case-studies"}
+                        onClick={() => setActiveTab("case-studies")}
+                        items={[
+                            { label: "Create New", onClick: () => setActiveTab("case-studies") },
+                            { label: "Manage Case Studies", onClick: () => console.log("manage case studies") },
+                        ]}
+                    />
+
+                    <NavDropdown
+                        label="Blogs"
+                        active={activeTab === "blogs"}
+                        onClick={() => setActiveTab("blogs")}
+                        items={[
+                            { label: "Create Blog", onClick: () => setActiveTab("blogs") },
+                            { label: "Manage Blogs", onClick: () => console.log("manage blogs") },
+                        ]}
+                    />
+
+                    <NavDropdown
+                        label="Research Hub"
+                        active={activeTab === "research"}
+                        onClick={() => setActiveTab("research")}
+                        items={[
+                            { label: "Create Article", onClick: () => setActiveTab("research") },
+                            { label: "Manage Research Articles", onClick: () => console.log("manage research") },
+                        ]}
+                    />
+
                 </nav>
 
                 {/* Save status */}
                 <div className="flex items-center gap-2">
-                    <div className={`w-2 h-2 rounded-full transition-colors duration-300 ${isSaved ? "bg-green-400" : "bg-gray-700"}`} />
-                    <span className="text-xs text-gray-500">{isSaved ? "Saved" : "Draft"}</span>
+                    <div className={`w-2 h-2 rounded-full transition-colors duration-300 ${isSaved ? "bg-green-400" : "bg-gray-700"
+                        }`} />
+                    <span className="text-xs text-gray-500">
+                        {isSaved ? "Saved" : "Draft"}
+                    </span>
                 </div>
             </div>
         </header>
