@@ -9,10 +9,10 @@
 import { useState } from "react";
 
 // ── Internal components ────────────────────────────────────────────────────────
-import CaseStudyForm from "@/components/cms/CaseStudyForm";
-import SidebarPreview from "@/components/cms/SidebarPreview";
-import ComingSoon from "@/components/cms/ComingSoon";
-import JsonModal from "@/components/cms/JsonModal";
+import CaseStudyForm from "@/components/case_studies/CaseStudyForm";
+import SidebarPreview from "@/components/case_studies/SidebarPreview";
+import ComingSoon from "@/components/case_studies/ComingSoon";
+import JsonModal from "@/components/case_studies/JsonModal";
 
 // ── Shared constants / helpers ─────────────────────────────────────────────────
 import { initCaseStudyForm } from "@/components/constants";

@@ -1,7 +1,7 @@
 "use client";
 
 // components/cms/ResultsEditor.js
-import { Field } from "./FormPrimitives";
+import { Field } from "../FormPrimitives";
 
 const SEVERITY_OPTIONS = ["critical", "warning", "info"];
 
