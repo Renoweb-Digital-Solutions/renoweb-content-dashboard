@@ -6,7 +6,7 @@ import AuthorSelector from "./AuthorSelector";
 import BannerUploader from "./BannerUploader";
 import BeforeAfterEditor from "./Beforeaftereditor";
 
-import { Field, ListEditor, Section } from "./FormPrimitives";
+import { Field, ListEditor, Section } from "../FormPrimitives";
 import ResultsEditor from "./Resultseditor";
 import UiUxIssuesEditor from "./Uiuxissueseditor";
 
