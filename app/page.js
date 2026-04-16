@@ -65,7 +65,7 @@ const SECTIONS = [
       { label: "Data fields", value: "12+" },
     ],
     accent: "cyan",
-    status: "coming-soon",
+    status: "live",
   },
 ];
 

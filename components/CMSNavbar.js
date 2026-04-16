@@ -1,77 +1,30 @@
 "use client";
 
-import { useState } from "react";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
 import { useNetwork } from "@/lib/networkContext";
 
 const NAV_ITEMS = [
-    {
-        label: "Case Studies",
-        href: "/cms/case_studies",
-        items: [
-            { label: "Create New", href: "/cms/case_studies" },
-            { label: "Manage Case Studies", href: "/cms/case_studies/manage" },
-        ],
-    },
-    {
-        label: "Blog",
-        href: "/cms/blogs",
-        items: [
-            { label: "Create Blog Post", href: "/cms/blog" },
-            { label: "Manage Blogs", href: "/cms/blogs/manage" },
-        ],
-    },
-    {
-        label: "Research Hub",
-        href: "/cms/research_hub",
-        items: [
-            { label: "Create Article", href: "/cms/research_hub" },
-            { label: "Manage Research Articles", href: "/cms/research_hub/manage" },
-        ],
-    },
+    { label: "Case Studies", href: "/cms/case_studies" },
+    { label: "Blog", href: "/cms/blogs" },
+    { label: "Research Hub", href: "/cms/research_hub" },
 ];
 
 // ── Dropdown ─────────────────────────────────────────
-function NavDropdown({ item, active }) {
+function NavLink({ item, active }) {
     return (
-        <div className="relative group">
-
-            {/* Parent */}
-            <Link
-                href={item.href}
-                className={`relative px-5 py-2 text-sm font-semibold tracking-wide transition-all duration-200 ${active
-                        ? "text-white"
-                        : "text-gray-500 hover:text-gray-300"
-                    }`}
-            >
-                {item.label}
-                {active && (
-                    <span className="absolute bottom-0 left-0 right-0 h-[2px] bg-blue-600 rounded-full" />
-                )}
-            </Link>
-
-            {/* Dropdown */}
-            <div
-                className="absolute left-0 mt-2 w-52 bg-black border border-gray-800 rounded-xl shadow-xl z-50 
-        opacity-0 invisible translate-y-2 
-        group-hover:opacity-100 group-hover:visible group-hover:translate-y-0
-        transition-all duration-200"
-            >
-                <div className="py-2">
-                    {item.items.map((sub) => (
-                        <Link
-                            key={sub.href}
-                            href={sub.href}
-                            className="block px-4 py-2 text-xs text-gray-400 hover:text-white hover:bg-gray-900 transition"
-                        >
-                            {sub.label}
-                        </Link>
-                    ))}
-                </div>
-            </div>
-
-        </div>
+        <Link
+            href={item.href}
+            className={`relative px-5 py-2 text-sm font-semibold tracking-wide transition-all duration-200 ${active
+                ? "text-white"
+                : "text-gray-500 hover:text-gray-300"
+                }`}
+        >
+            {item.label}
+            {active && (
+                <span className="absolute bottom-0 left-0 right-0 h-[2px] bg-blue-600 rounded-full" />
+            )}
+        </Link>
     );
 }
 
@@ -116,7 +69,7 @@ export default function CMSNavbar() {
                 {/* Nav */}
                 <nav className="flex items-center gap-2">
                     {NAV_ITEMS.map((item) => (
-                        <NavDropdown
+                        <NavLink
                             key={item.href}
                             item={item}
                             active={isActive(item.href)}
