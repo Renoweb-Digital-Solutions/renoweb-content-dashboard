@@ -11,7 +11,14 @@ import ResultsEditor from "./Resultseditor";
 import UiUxIssuesEditor from "./Uiuxissueseditor";
 
 
-export default function CaseStudyForm({ form, setForm, onReset }) {
+export default function CaseStudyForm({
+    form,
+    setForm,
+    onReset,
+    title = "New Case Study",
+    description = "Fill in the details below. A JSON preview is generated automatically.",
+    showHeader = true,
+}) {
     // generic top-level setter
     const set = (key, val) => setForm((f) => ({ ...f, [key]: val }));
 
@@ -24,20 +31,20 @@ export default function CaseStudyForm({ form, setForm, onReset }) {
     return (
         <div>
             {/* Page heading */}
-            <div className="flex items-center justify-between mb-8">
-                <div>
-                    <h1 className="text-xl font-bold text-white">New Case Study</h1>
-                    <p className="text-xs text-gray-500 mt-0.5">
-                        Fill in the details below. A JSON preview is generated automatically.
-                    </p>
+            {showHeader && (
+                <div className="mb-8 flex items-center justify-between">
+                    <div>
+                        <h1 className="text-xl font-bold text-white">{title}</h1>
+                        <p className="mt-0.5 text-xs text-gray-500">{description}</p>
+                    </div>
+                    <button
+                        onClick={onReset}
+                        className="rounded-lg border border-gray-800 px-3 py-1.5 text-xs text-gray-600 transition hover:border-gray-700 hover:text-gray-300"
+                    >
+                        Reset all
+                    </button>
                 </div>
-                <button
-                    onClick={onReset}
-                    className="text-xs text-gray-600 hover:text-gray-300 transition px-3 py-1.5 rounded-lg border border-gray-800 hover:border-gray-700"
-                >
-                    Reset all
-                </button>
-            </div>
+            )}
 
             {/* ── BASICS ─────────────────────────────────────────────────── */}
             <Section title="Basics">
@@ -74,6 +81,19 @@ export default function CaseStudyForm({ form, setForm, onReset }) {
                         placeholder="How We Achieved 5+ Qualified Demo Bookings…"
                     />
                 </div>
+                <button
+                    onClick={() => set("featured", !form.featured)}
+                    className={`flex items-center gap-2.5 rounded-xl border px-4 py-3 text-sm font-medium transition-all ${form.featured ? "border-blue-500/50 bg-blue-500/10 text-blue-300" : "border-gray-800 bg-gray-900/50 text-gray-500 hover:border-gray-700"}`}
+                >
+                    <div className={`flex h-4 w-4 items-center justify-center rounded border ${form.featured ? "border-blue-400 bg-blue-400" : "border-gray-700"}`}>
+                        {form.featured && (
+                            <svg className="h-2.5 w-2.5 text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                            </svg>
+                        )}
+                    </div>
+                    Featured case study
+                </button>
             </Section>
 
             {/* ── BANNER ─────────────────────────────────────────────────── */}
