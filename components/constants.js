@@ -60,6 +60,10 @@ export const initCaseStudyForm = () => ({
         before: { imageFile: null, imagePreview: null, caption: "" },
         after: { imageFile: null, imagePreview: null, caption: "" },
     },
+    bannerUrl: "",
+    featured: false,
+    createdAt: "",
+    updatedAt: "",
 });
 
 export const DUMMY_CASE_STUDIES = [
