@@ -10,9 +10,11 @@
 // Amber/orange accent throughout. Uses dummy JSON from RHconstants.
 // ─────────────────────────────────────────────────────────────────────────────
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import RHRichTextEditor from "./RHrichtexteditor";
-import { DUMMY_RESEARCH_HUBS, RH_CATEGORIES, RH_CONTENT_TYPES, AUTHORS, slugify } from "./RHconstants";
+import { RH_CATEGORIES, RH_CONTENT_TYPES, AUTHORS, slugify } from "./RHconstants";
+import { subscribeToResearchEntries, deleteResearch, saveResearch } from "@/lib/research";
+import { useNetwork } from "@/lib/networkContext";
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -74,8 +76,12 @@ function DeleteConfirmModal({ entry, onConfirm, onCancel }) {
 
 // ── Update Modal ──────────────────────────────────────────────────────────────
 
-function UpdateModal({ entry, onSave, onClose }) {
-    const [form, setForm] = useState({ ...entry, content: entry.content || "" });
+function UpdateModal({ entry, onClose, onSave, saving }) {
+    const [form, setForm] = useState({
+        ...entry,
+        content: entry.content || "",
+        tags: [...(entry.tags || [])],
+    });
     const set = (key, val) => setForm((f) => ({ ...f, [key]: val }));
 
     const handleTitleBlur = () => {
@@ -292,19 +298,23 @@ function UpdateModal({ entry, onSave, onClose }) {
                 {/* Footer */}
                 <div className="flex gap-3 px-6 py-5 border-t border-gray-800">
                     <button
-                        onClick={() => onSave(form)}
-                        className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-amber-600 hover:bg-amber-700 text-white text-sm font-bold rounded-xl transition shadow-lg shadow-amber-600/20"
-                    >
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                        </svg>
-                        Save Changes
-                    </button>
-                    <button
                         onClick={onClose}
-                        className="px-5 py-3 bg-gray-900 text-gray-300 text-sm rounded-xl border border-gray-800 hover:bg-gray-800 transition font-medium"
+                        className="flex-1 px-4 py-2.5 bg-gray-900 text-gray-300 text-sm rounded-xl border border-gray-800 hover:bg-gray-800 transition font-medium"
                     >
                         Cancel
+                    </button>
+                    <button
+                        onClick={() => onSave(form)}
+                        disabled={saving}
+                        className="px-4 py-2.5 bg-amber-600 hover:bg-amber-700 text-white text-sm rounded-xl font-bold transition flex items-center gap-2 disabled:opacity-50"
+                    >
+                        {saving && (
+                            <svg className="h-4 w-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            </svg>
+                        )}
+                        Save Changes
                     </button>
                 </div>
             </div>
@@ -434,7 +444,9 @@ function EntryCard({ entry, onEdit, onDelete }) {
 // ── Main Component ────────────────────────────────────────────────────────────
 
 export default function RHManage() {
-    const [entries, setEntries] = useState(DUMMY_RESEARCH_HUBS);
+    const { setLoading, setSaved } = useNetwork();
+    const [entries, setEntries] = useState([]);
+    const [loadingData, setLoadingData] = useState(true);
     const [search, setSearch] = useState("");
     const [filterCategory, setFilterCategory] = useState("");
     const [filterType, setFilterType] = useState("");
@@ -443,6 +455,23 @@ export default function RHManage() {
     const [editEntry, setEditEntry] = useState(null);
     const [deleteEntry, setDeleteEntry] = useState(null);
     const [successMsg, setSuccessMsg] = useState("");
+    const [saving, setSaving] = useState(false);
+
+    // ── Subscribe to real-time updates ──────────────────────────────────────────
+    useEffect(() => {
+        const unsubscribe = subscribeToResearchEntries(
+            (data) => {
+                setEntries(data);
+                setLoadingData(false);
+            },
+            (error) => {
+                console.error("Failed to load research entries:", error);
+                setLoadingData(false);
+            }
+        );
+
+        return () => unsubscribe();
+    }, []);
 
     // ── Filter logic ────────────────────────────────────────────────────────
     const filtered = useMemo(() => {
@@ -460,22 +489,63 @@ export default function RHManage() {
     const downloadableCount = entries.filter((e) => e.downloadable).length;
 
     // ── Handlers ────────────────────────────────────────────────────────────
-    const handleSave = (updated) => {
-        setEntries((prev) => prev.map((e) => e.id === updated.id ? updated : e));
-        setEditEntry(null);
-        flash("Research entry updated successfully");
+    const handleSave = async (updated) => {
+        try {
+            setSaving(true);
+            setLoading(true);
+            
+            const result = await saveResearch(updated, {
+                originalSlug: editEntry.slug,
+                confirmOverwrite: async () =>
+                    window.confirm("A research entry with this slug already exists. Overwrite?"),
+            });
+
+            if (result?.cancelled) {
+                return;
+            }
+
+            setEditEntry(null);
+            flash("Research entry updated successfully");
+            setSaved(true);
+            setTimeout(() => setSaved(false), 3000);
+        } catch (error) {
+            console.error(error);
+            alert(error.message || "Failed to update research entry");
+        } finally {
+            setSaving(false);
+            setLoading(false);
+        }
     };
 
-    const handleDelete = () => {
-        setEntries((prev) => prev.filter((e) => e.id !== deleteEntry.id));
-        setDeleteEntry(null);
-        flash("Research entry deleted");
+    const handleDelete = async () => {
+        try {
+            setLoading(true);
+            await deleteResearch(deleteEntry.slug);
+            setDeleteEntry(null);
+            flash("Research entry deleted");
+            setSaved(true);
+            setTimeout(() => setSaved(false), 3000);
+        } catch (error) {
+            console.error(error);
+            alert("Failed to delete research entry");
+        } finally {
+            setLoading(false);
+        }
     };
 
     const flash = (msg) => {
         setSuccessMsg(msg);
         setTimeout(() => setSuccessMsg(""), 3000);
     };
+
+    if (loadingData) {
+        return (
+            <div className="flex flex-col items-center justify-center py-32">
+                <div className="mb-4 h-8 w-8 animate-spin rounded-full border-4 border-gray-800 border-t-amber-500"></div>
+                <p className="text-sm font-medium text-gray-500">Loading research entries...</p>
+            </div>
+        );
+    }
 
     return (
         <div>
@@ -593,8 +663,9 @@ export default function RHManage() {
             {editEntry && (
                 <UpdateModal
                     entry={editEntry}
-                    onSave={handleSave}
                     onClose={() => setEditEntry(null)}
+                    onSave={handleSave}
+                    saving={saving}
                 />
             )}
             {deleteEntry && (

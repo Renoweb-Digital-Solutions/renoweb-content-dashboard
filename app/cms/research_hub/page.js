@@ -17,14 +17,17 @@ import RHJsonModal from "@/components/research/RHjsonmodal";
 import RHManage from "@/components/research/RHmanage";
 import RHSidebarPreview from "@/components/research/RHsidebarpreview";
 import { initRHForm, slugify } from "@/components/research/RHconstants";
+import { saveResearch } from "@/lib/research";
+import { useNetwork } from "@/lib/networkContext";
 
 
 export default function ResearchHubPage() {
     const [activeTab, setActiveTab] = useState("new"); // "new" | "manage"
     const [form, setForm] = useState(initRHForm());
-    const [loading, setLoading] = useState(false);
     const [showJson, setShowJson] = useState(false);
     const [successMsg, setSuccessMsg] = useState("");
+
+    const { loading, setLoading, setSaved } = useNetwork();
 
     // ── Reset ─────────────────────────────────────────────────────────────────
     const handleReset = () => {
@@ -35,35 +38,26 @@ export default function ResearchHubPage() {
 
     // ── Save / Publish ────────────────────────────────────────────────────────
     const handleSave = async () => {
-        const id = form.slug || slugify(form.title) || `rh-${Date.now()}`;
         setLoading(true);
         try {
-            // ── Firebase Storage banner upload (activate when credentials ready) ──
-            // let bannerUrl = null;
-            // if (form.bannerFile) {
-            //     const storage = getStorage();
-            //     const ext = form.bannerFile.name.split(".").pop();
-            //     const storageRef = ref(storage, `contentimages/research-hub-banners/${id}.${ext}`);
-            //     await uploadBytes(storageRef, form.bannerFile);
-            //     bannerUrl = await getDownloadURL(storageRef);
-            // }
+            const result = await saveResearch(form, {
+                confirmOverwrite: async () => window.confirm("A research entry with this slug already exists. Overwrite?"),
+            });
 
-            // ── Firestore write (activate when credentials ready) ──────────────
-            // await setDoc(doc(db, "researchHub", id), {
-            //     ...form,
-            //     id,
-            //     bannerUrl,
-            //     bannerFile: null,
-            //     bannerPreview: null,
-            //     updatedAt: serverTimestamp(),
-            // });
+            if (result?.cancelled) {
+                return;
+            }
 
-            console.log("Research Hub entry ready to publish:", { ...form, id });
-            setSuccessMsg("Research entry ready — connect Firebase to publish live.");
-            setTimeout(() => setSuccessMsg(""), 4000);
+            setSuccessMsg("Research entry published live!");
+            setSaved(true);
+            setForm(initRHForm());
+            setTimeout(() => {
+                setSuccessMsg("");
+                setSaved(false);
+            }, 4000);
         } catch (err) {
             console.error("Publish failed:", err);
-            setSuccessMsg("Error — check console for details.");
+            setSuccessMsg(err.message || "Error — check console for details.");
             setTimeout(() => setSuccessMsg(""), 4000);
         } finally {
             setLoading(false);
