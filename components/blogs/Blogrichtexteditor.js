@@ -41,24 +41,8 @@ export default function BlogRichTextEditor({ value, onChange, slug }) {
             const el = editorRef.current?.querySelector(`[data-img-id="${imageId}"]`);
             if (!el) return;
 
-            const path = el.getAttribute("data-img-path");
-
-            try {
-                if (path) {
-                    const { data, error } = await supabase.storage
-                        .from("contentimages")
-                        .remove([path]);
-
-                    console.log("DELETE RESULT:", data, error);
-
-                    if (error) {
-                        console.error("Supabase delete error:", error.message);
-                    }
-                }
-            } catch (err) {
-                console.error("Failed to delete image:", err);
-            }
-
+            // Just remove from DOM. Deletion from Supabase will be handled
+            // during the save process by diffing the HTML.
             el.remove();
             handleInput(); // update state
         };
@@ -112,15 +96,12 @@ export default function BlogRichTextEditor({ value, onChange, slug }) {
     const handleImageFile = async (file) => {
         if (!file) return;
 
-        const postId = slug || `draft-${Date.now()}`;
-        const ext = file.name.split(".").pop();
-        const fileName = `blog-images/${postId}/${Date.now()}.${ext}`;
-        const placeholderId = `img-uploading-${Date.now()}`;
+        // Generate local blob URL instead of uploading instantly
+        const blobUrl = URL.createObjectURL(file);
+        const imageId = `img-${Date.now()}`;
 
-        // Insert placeholder at cursor immediately
         editorRef.current?.focus();
 
-        // 🔥 Safe restore
         if (savedRange.current) {
             try {
                 restoreRange();
@@ -128,44 +109,25 @@ export default function BlogRichTextEditor({ value, onChange, slug }) {
                 console.log("Range restore failed, inserting at end");
             }
         }
+        
         const insertHTML = (html) => {
             const sel = window.getSelection();
-
             if (sel && sel.rangeCount > 0) {
                 document.execCommand("insertHTML", false, html);
             } else {
                 editorRef.current.innerHTML += html; // fallback
             }
         };
-        insertHTML(
-            `<span id="${placeholderId}" style="display:inline-flex;align-items:center;gap:6px;padding:6px 12px;background:rgba(37,99,235,0.1);border:1px dashed rgba(37,99,235,0.4);border-radius:8px;color:#60a5fa;font-size:12px;">
-        ⏳ Uploading image…
-      </span>`
-        );
 
-        setUploadingImage(true);
-        try {
-            const { error: uploadError } = await supabase.storage
-                .from("contentimages")
-                .upload(fileName, file, { upsert: true });
-
-            if (uploadError) throw uploadError;
-
-            const { data } = supabase.storage.from("contentimages").getPublicUrl(fileName);
-
-            const placeholder = editorRef.current?.querySelector(`#${placeholderId}`);
-            if (placeholder) {
-                const imageId = `img-${Date.now()}`;
-
-                placeholder.outerHTML = `
+        insertHTML(`
   <span 
     contenteditable="false" 
     data-img-id="${imageId}" 
-    data-img-path="${fileName}"
+    data-pending-upload="true"
     style="position:relative;display:inline-block;margin:12px 0;"
   >
     <img 
-      src="${data.publicUrl}" 
+      src="${blobUrl}" 
       style="max-width:100%;border-radius:12px;display:block;"
     />
     
@@ -186,22 +148,9 @@ export default function BlogRichTextEditor({ value, onChange, slug }) {
       "
     >✕</button>
   </span>
-`;
-            } else {
-                document.execCommand("insertHTML", false,
-                    `<img src="${data.publicUrl}" alt="blog image" style="max-width:100%;border-radius:12px;margin:12px 0;" />`
-                );
-            }
-        } catch (err) {
-            console.error("Image upload failed:", err);
-            const placeholder = editorRef.current?.querySelector(`#${placeholderId}`);
-            if (placeholder) {
-                placeholder.outerHTML = `<span style="padding:4px 10px;background:rgba(239,68,68,0.1);border:1px dashed rgba(239,68,68,0.4);border-radius:6px;color:#f87171;font-size:11px;">⚠ Image upload failed — check Supabase credentials</span>`;
-            }
-        } finally {
-            setUploadingImage(false);
-            handleInput();
-        }
+`);
+
+        handleInput();
     };
 
     // ── Link insert ────────────────────────────────────────────────────────────

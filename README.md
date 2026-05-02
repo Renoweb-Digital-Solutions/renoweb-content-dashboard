@@ -65,6 +65,22 @@ We use Supabase instead of Firebase Storage because:
 
 ---
 
+# 🖼️ Rich Text Image Handling (Deferred Sync)
+
+To ensure high performance, zero orphaned files, and safe "Cancel" operations, the CMS uses a **Deferred Synchronization** architecture for images inserted via the Rich Text Editor.
+
+### 🧠 The Logic
+1.  **Instant Preview (`blob:`)**: When an image is inserted, it is NOT uploaded to Supabase immediately. Instead, we generate a local browser-memory URL (`URL.createObjectURL(file)`). This provides an instant, lag-free experience for the user.
+2.  **Deferred Upload**: The actual upload only occurs when the user clicks **Publish** or **Save Changes**.
+3.  **Automatic HTML Swapping**: During the save process, the service layer (`lib/blogs.js` or `lib/research.js`) parses the HTML, fetches the raw data from the `blob:` URLs, uploads them to Supabase, and replaces the local URLs with the public Supabase URLs in the final HTML string.
+4.  **Smart Cleanup (Diffing)**: If an entry is updated, the system compares the Supabase URLs in the *old* content vs. the *new* content. Any image removed from the editor is automatically deleted from Supabase Storage to prevent space leaks.
+5.  **Safe Cancellation**: If a user uploads an image and then closes the tab or clicks cancel, no network request is ever sent to Supabase, keeping the storage bucket clean.
+
+### 🏗️ Architecture Diagram
+![Rich Text Editor Sync Architecture](public/RTE_Diagram.svg)
+
+---
+
 ## ❓ Why NOT Firebase Storage?
 
 Firebase Storage:
