@@ -27,12 +27,14 @@ export default function BlogRichTextEditor({ value, onChange, slug }) {
     const [wordCount, setWordCount] = useState(0);
     const [uploadingImage, setUploadingImage] = useState(false);
 
-    // Seed initial HTML once on mount
+    // Seed initial HTML or clear it if parent resets value
     useEffect(() => {
-        if (editorRef.current && value && editorRef.current.innerHTML !== value) {
-            editorRef.current.innerHTML = value;
+        if (editorRef.current && editorRef.current.innerHTML !== value) {
+            editorRef.current.innerHTML = value || "";
+            // Keep word count in sync
+            setWordCount((value || "").trim().split(/\s+/).filter(Boolean).length);
         }
-    }, []); // eslint-disable-line react-hooks/exhaustive-deps
+    }, [value]);
 
     useEffect(() => {
         window.__deleteEditorImage = async (imageId) => {
