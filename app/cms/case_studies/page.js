@@ -34,6 +34,7 @@ export function CaseStudiesPageContent({ initialTab = "new" }) {
                 return;
             }
 
+            setForm(initCaseStudyForm());
             flashSaved();
         } catch (error) {
             console.error(error);
