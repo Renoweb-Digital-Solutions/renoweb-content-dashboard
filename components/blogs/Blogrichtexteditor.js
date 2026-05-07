@@ -203,6 +203,36 @@ export default function BlogRichTextEditor({ value, onChange, slug }) {
         handleInput();
     };
 
+    // ── Paste handler ──────────────────────────────────────────────────────────
+
+    const handlePaste = (e) => {
+        e.preventDefault();
+        const html = e.clipboardData.getData("text/html");
+        const text = e.clipboardData.getData("text/plain");
+
+        if (html) {
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(html, "text/html");
+
+            // Remove background colors and other unwanted background styles
+            const allElements = doc.querySelectorAll("*");
+            allElements.forEach(el => {
+                if (el.style) {
+                    el.style.backgroundColor = "";
+                    el.style.background = "";
+                    el.style.backgroundImage = "";
+                    el.style.color = ""; // Clear explicit colors to default to editor theme
+                }
+            });
+
+            const cleanHtml = doc.body.innerHTML;
+            document.execCommand("insertHTML", false, cleanHtml);
+        } else if (text) {
+            document.execCommand("insertText", false, text);
+        }
+        handleInput();
+    };
+
     // ── Toolbar button helper ──────────────────────────────────────────────────
 
     const toolBtn = (active, onClick, title, children) => (
@@ -355,6 +385,7 @@ export default function BlogRichTextEditor({ value, onChange, slug }) {
                 contentEditable
                 suppressContentEditableWarning
                 onInput={handleInput}
+                onPaste={handlePaste}
                 className="min-h-[420px] p-6 text-sm text-gray-200 outline-none leading-relaxed blog-editor"
                 style={{ caretColor: "#60a5fa" }}
                 data-placeholder="Start writing your blog post here…"

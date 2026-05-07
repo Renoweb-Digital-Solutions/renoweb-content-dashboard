@@ -201,6 +201,39 @@ export default function RHRichTextEditor({ value, onChange, slug }) {
         handleInput();
     };
 
+    // ── Paste handler ──────────────────────────────────────────────────────────
+
+    const handlePaste = (e) => {
+        e.preventDefault();
+        const html = e.clipboardData.getData("text/html");
+        const text = e.clipboardData.getData("text/plain");
+
+        if (html) {
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(html, "text/html");
+
+            // Remove background colors and other unwanted background styles
+            const allElements = doc.querySelectorAll("*");
+            allElements.forEach(el => {
+                if (el.style) {
+                    el.style.backgroundColor = "";
+                    el.style.background = "";
+                    el.style.backgroundImage = "";
+                    el.style.color = ""; // Clear explicit colors to default to editor theme
+                }
+            });
+
+            // Additionally, if any element has a class that might set a background, 
+            // we might want to be careful, but usually it's inline styles from external docs.
+            
+            const cleanHtml = doc.body.innerHTML;
+            document.execCommand("insertHTML", false, cleanHtml);
+        } else if (text) {
+            document.execCommand("insertText", false, text);
+        }
+        handleInput();
+    };
+
     // ── Toolbar button ─────────────────────────────────────────────────────────
 
     const toolBtn = (active, onClick, title, children) => (
@@ -339,6 +372,7 @@ export default function RHRichTextEditor({ value, onChange, slug }) {
                 contentEditable
                 suppressContentEditableWarning
                 onInput={handleInput}
+                onPaste={handlePaste}
                 className="min-h-[420px] p-6 text-sm text-gray-200 outline-none leading-relaxed rh-editor"
                 style={{ caretColor: "#fbbf24" }}
                 data-placeholder="Start writing your research content here…"
