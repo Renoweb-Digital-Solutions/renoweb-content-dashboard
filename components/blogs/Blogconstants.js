@@ -59,4 +59,5 @@ export const initBlogForm = () => ({
     publishDate: new Date().toISOString().slice(0, 10),
     tags: [],
     readTime: "",
+    schemaStructuredData: "",
 });

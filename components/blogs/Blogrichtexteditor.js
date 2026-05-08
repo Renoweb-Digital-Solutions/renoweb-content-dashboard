@@ -26,6 +26,16 @@ export default function BlogRichTextEditor({ value, onChange, slug }) {
     const [videoUrl, setVideoUrl] = useState("");
     const [wordCount, setWordCount] = useState(0);
     const [uploadingImage, setUploadingImage] = useState(false);
+    const [showTableControls, setShowTableControls] = useState(false);
+
+    // ── Helpers ────────────────────────────────────────────────────────────────
+
+    const handleInput = () => {
+        const html = editorRef.current?.innerHTML || "";
+        onChange(html);
+        const words = (editorRef.current?.innerText || "").trim().split(/\s+/).filter(Boolean).length;
+        setWordCount(words);
+    };
 
     // Seed initial HTML or clear it if parent resets value
     useEffect(() => {
@@ -52,14 +62,27 @@ export default function BlogRichTextEditor({ value, onChange, slug }) {
         };
     }, []);
 
-    // ── Helpers ────────────────────────────────────────────────────────────────
+    // ── Selection change handler ───────────────────────────────────────────────
 
-    const handleInput = () => {
-        const html = editorRef.current?.innerHTML || "";
-        onChange(html);
-        const words = (editorRef.current?.innerText || "").trim().split(/\s+/).filter(Boolean).length;
-        setWordCount(words);
+    const handleSelectionChange = () => {
+        const sel = window.getSelection();
+        if (!sel.rangeCount) {
+            setShowTableControls(false);
+            return;
+        }
+
+        const cell = sel.getRangeAt(0).commonAncestorContainer;
+        const td = cell.nodeType === Node.TEXT_NODE ? cell.parentElement : cell;
+        const isInTable = td.closest('table');
+
+        setShowTableControls(!!isInTable);
     };
+
+    useEffect(() => {
+        const handleSelection = () => handleSelectionChange();
+        document.addEventListener('selectionchange', handleSelection);
+        return () => document.removeEventListener('selectionchange', handleSelection);
+    }, []);
 
     const saveRange = () => {
         const sel = window.getSelection();
@@ -68,7 +91,6 @@ export default function BlogRichTextEditor({ value, onChange, slug }) {
 
     const restoreRange = () => {
         const sel = window.getSelection();
-
         if (savedRange.current) {
             try {
                 sel.removeAllRanges();
@@ -83,12 +105,24 @@ export default function BlogRichTextEditor({ value, onChange, slug }) {
 
     const exec = (cmd, val = null) => {
         editorRef.current?.focus();
-        document.execCommand(cmd, false, val);
+        if (cmd === "formatBlock" && val && isBlockActive(val)) {
+            // If already active, convert to paragraph
+            document.execCommand(cmd, false, "P");
+        } else {
+            document.execCommand(cmd, false, val);
+        }
         handleInput();
     };
 
     const isActive = (cmd) => {
         try { return document.queryCommandState(cmd); } catch { return false; }
+    };
+
+    const isBlockActive = (blockType) => {
+        try {
+            const value = document.queryCommandValue("formatBlock");
+            return value.toLowerCase() === blockType.toLowerCase();
+        } catch { return false; }
     };
 
     // ── Image upload → Supabase ────────────────────────────────────────────────
@@ -109,7 +143,7 @@ export default function BlogRichTextEditor({ value, onChange, slug }) {
                 console.log("Range restore failed, inserting at end");
             }
         }
-        
+
         const insertHTML = (html) => {
             const sel = window.getSelection();
             if (sel && sel.rangeCount > 0) {
@@ -203,6 +237,161 @@ export default function BlogRichTextEditor({ value, onChange, slug }) {
         handleInput();
     };
 
+    // ── Table insert ───────────────────────────────────────────────────────────
+
+    const insertTable = () => {
+        restoreRange();
+        document.execCommand("insertHTML", false,
+            `<table style="width:100%;border-collapse:collapse;margin:16px 0;border:1px solid #374151;">
+        <thead>
+            <tr>
+                <th style="border:1px solid #374151;padding:8px;text-align:left;background:#1f2937;color:#f9fafb;">Header 1</th>
+                <th style="border:1px solid #374151;padding:8px;text-align:left;background:#1f2937;color:#f9fafb;">Header 2</th>
+                <th style="border:1px solid #374151;padding:8px;text-align:left;background:#1f2937;color:#f9fafb;">Header 3</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td style="border:1px solid #374151;padding:8px;color:#d1d5db;">Cell 1</td>
+                <td style="border:1px solid #374151;padding:8px;color:#d1d5db;">Cell 2</td>
+                <td style="border:1px solid #374151;padding:8px;color:#d1d5db;">Cell 3</td>
+            </tr>
+            <tr>
+                <td style="border:1px solid #374151;padding:8px;color:#d1d5db;">Cell 4</td>
+                <td style="border:1px solid #374151;padding:8px;color:#d1d5db;">Cell 5</td>
+                <td style="border:1px solid #374151;padding:8px;color:#d1d5db;">Cell 6</td>
+            </tr>
+        </tbody>
+      </table>`
+        );
+        editorRef.current?.focus();
+        handleInput();
+    };
+
+    // ── Table manipulation ─────────────────────────────────────────────────────
+
+    const insertRowAbove = () => {
+        const sel = window.getSelection();
+        if (!sel.rangeCount) return;
+
+        const cell = sel.getRangeAt(0).commonAncestorContainer;
+        const td = cell.nodeType === Node.TEXT_NODE ? cell.parentElement : cell;
+        const tr = td.closest('tr');
+        if (!tr) return;
+
+        const newRow = tr.cloneNode(true);
+        const cells = newRow.querySelectorAll('td, th');
+        cells.forEach(cell => cell.textContent = '');
+
+        tr.parentElement.insertBefore(newRow, tr);
+        handleInput();
+    };
+
+    const insertRowBelow = () => {
+        const sel = window.getSelection();
+        if (!sel.rangeCount) return;
+
+        const cell = sel.getRangeAt(0).commonAncestorContainer;
+        const td = cell.nodeType === Node.TEXT_NODE ? cell.parentElement : cell;
+        const tr = td.closest('tr');
+        if (!tr) return;
+
+        const newRow = tr.cloneNode(true);
+        const cells = newRow.querySelectorAll('td, th');
+        cells.forEach(cell => cell.textContent = '');
+
+        tr.parentElement.insertBefore(newRow, tr.nextSibling);
+        handleInput();
+    };
+
+    const insertColumnLeft = () => {
+        const sel = window.getSelection();
+        if (!sel.rangeCount) return;
+
+        const cell = sel.getRangeAt(0).commonAncestorContainer;
+        const td = cell.nodeType === Node.TEXT_NODE ? cell.parentElement : cell;
+        const table = td.closest('table');
+        if (!table) return;
+
+        const cellIndex = Array.from(td.parentElement.children).indexOf(td);
+        const rows = table.querySelectorAll('tr');
+
+        rows.forEach(row => {
+            const newCell = document.createElement(row.children[0].tagName);
+            newCell.style.cssText = 'border:1px solid #374151;padding:8px;text-align:left;';
+            if (row.children[0].tagName === 'TH') {
+                newCell.style.cssText += 'background:#1f2937;color:#f9fafb;';
+                newCell.textContent = 'Header';
+            } else {
+                newCell.style.cssText += 'color:#d1d5db;';
+                newCell.textContent = 'Cell';
+            }
+            row.insertBefore(newCell, row.children[cellIndex]);
+        });
+        handleInput();
+    };
+
+    const insertColumnRight = () => {
+        const sel = window.getSelection();
+        if (!sel.rangeCount) return;
+
+        const cell = sel.getRangeAt(0).commonAncestorContainer;
+        const td = cell.nodeType === Node.TEXT_NODE ? cell.parentElement : cell;
+        const table = td.closest('table');
+        if (!table) return;
+
+        const cellIndex = Array.from(td.parentElement.children).indexOf(td);
+        const rows = table.querySelectorAll('tr');
+
+        rows.forEach(row => {
+            const newCell = document.createElement(row.children[0].tagName);
+            newCell.style.cssText = 'border:1px solid #374151;padding:8px;text-align:left;';
+            if (row.children[0].tagName === 'TH') {
+                newCell.style.cssText += 'background:#1f2937;color:#f9fafb;';
+                newCell.textContent = 'Header';
+            } else {
+                newCell.style.cssText += 'color:#d1d5db;';
+                newCell.textContent = 'Cell';
+            }
+            row.insertBefore(newCell, row.children[cellIndex + 1]);
+        });
+        handleInput();
+    };
+
+    const deleteRow = () => {
+        const sel = window.getSelection();
+        if (!sel.rangeCount) return;
+
+        const cell = sel.getRangeAt(0).commonAncestorContainer;
+        const td = cell.nodeType === Node.TEXT_NODE ? cell.parentElement : cell;
+        const tr = td.closest('tr');
+        const tbody = tr.parentElement;
+        if (!tr || tbody.children.length <= 1) return;
+
+        tr.remove();
+        handleInput();
+    };
+
+    const deleteColumn = () => {
+        const sel = window.getSelection();
+        if (!sel.rangeCount) return;
+
+        const cell = sel.getRangeAt(0).commonAncestorContainer;
+        const td = cell.nodeType === Node.TEXT_NODE ? cell.parentElement : cell;
+        const table = td.closest('table');
+        if (!table) return;
+
+        const cellIndex = Array.from(td.parentElement.children).indexOf(td);
+        const rows = table.querySelectorAll('tr');
+
+        if (rows[0].children.length <= 1) return; // Don't delete last column
+
+        rows.forEach(row => {
+            row.children[cellIndex].remove();
+        });
+        handleInput();
+    };
+
     // ── Paste handler ──────────────────────────────────────────────────────────
 
     const handlePaste = (e) => {
@@ -271,10 +460,10 @@ export default function BlogRichTextEditor({ value, onChange, slug }) {
                 {divider}
 
                 {/* Headings */}
-                {toolBtn(false, () => exec("formatBlock", "H2"), "Heading 2", <span className="text-[11px] font-black">H2</span>)}
-                {toolBtn(false, () => exec("formatBlock", "H3"), "Heading 3", <span className="text-[11px] font-black">H3</span>)}
-                {toolBtn(false, () => exec("formatBlock", "H4"), "Heading 4", <span className="text-[11px] font-black">H4</span>)}
-                {toolBtn(false, () => exec("formatBlock", "P"), "Paragraph", <span className="text-[11px]">¶</span>)}
+                {toolBtn(isBlockActive("H2"), () => exec("formatBlock", "H2"), "Heading 2", <span className="text-[11px] font-black">H2</span>)}
+                {toolBtn(isBlockActive("H3"), () => exec("formatBlock", "H3"), "Heading 3", <span className="text-[11px] font-black">H3</span>)}
+                {toolBtn(isBlockActive("H4"), () => exec("formatBlock", "H4"), "Heading 4", <span className="text-[11px] font-black">H4</span>)}
+                {toolBtn(isBlockActive("P"), () => exec("formatBlock", "P"), "Paragraph", <span className="text-[11px]">¶</span>)}
 
                 {divider}
 
@@ -283,7 +472,7 @@ export default function BlogRichTextEditor({ value, onChange, slug }) {
                     <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><line x1="9" y1="6" x2="20" y2="6" /><line x1="9" y1="12" x2="20" y2="12" /><line x1="9" y1="18" x2="20" y2="18" /><circle cx="4" cy="6" r="1.5" /><circle cx="4" cy="12" r="1.5" /><circle cx="4" cy="18" r="1.5" /></svg>)}
                 {toolBtn(isActive("insertOrderedList"), () => exec("insertOrderedList"), "Numbered list",
                     <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><line x1="10" y1="6" x2="21" y2="6" /><line x1="10" y1="12" x2="21" y2="12" /><line x1="10" y1="18" x2="21" y2="18" /><path d="M4 6h1v4" /><path d="M4 10h2" /><path d="M6 18H4c0-1 2-2 2-3s-1-2-2-2" /></svg>)}
-                {toolBtn(false, () => exec("formatBlock", "BLOCKQUOTE"), "Blockquote",
+                {toolBtn(isBlockActive("BLOCKQUOTE"), () => exec("formatBlock", "BLOCKQUOTE"), "Blockquote",
                     <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M3 21c3 0 7-1 7-8V5c0-1.25-.756-2.017-2-2H4c-1.25 0-2 .75-2 1.972V11c0 1.25.75 2 2 2 1 0 1 0 1 1v1c0 1-1 2-2 2s-1 .008-1 1.031V20c0 1 0 1 1 1z" /><path d="M15 21c3 0 7-1 7-8V5c0-1.25-.757-2.017-2-2h-4c-1.25 0-2 .75-2 1.972V11c0 1.25.75 2 2 2h.75c0 2.25.25 4-2.75 4v3c0 1 0 1 1 1z" /></svg>)}
 
                 {divider}
@@ -293,12 +482,29 @@ export default function BlogRichTextEditor({ value, onChange, slug }) {
                     <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><line x1="3" y1="6" x2="21" y2="6" /><line x1="3" y1="12" x2="15" y2="12" /><line x1="3" y1="18" x2="18" y2="18" /></svg>)}
                 {toolBtn(false, () => exec("justifyCenter"), "Align center",
                     <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><line x1="3" y1="6" x2="21" y2="6" /><line x1="6" y1="12" x2="18" y2="12" /><line x1="4" y1="18" x2="20" y2="18" /></svg>)}
+                {toolBtn(false, () => exec("justifyRight"), "Align right",
+                    <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><line x1="3" y1="6" x2="21" y2="6" /><line x1="9" y1="12" x2="21" y2="12" /><line x1="6" y1="18" x2="21" y2="18" /></svg>)}
 
                 {divider}
 
                 {/* Code block */}
                 {toolBtn(false, () => exec("formatBlock", "PRE"), "Code block",
                     <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><polyline points="16 18 22 12 16 6" /><polyline points="8 6 2 12 8 18" /></svg>)}
+
+                {/* Table */}
+                <button
+                    onMouseDown={(e) => { e.preventDefault(); saveRange(); insertTable(); }}
+                    title="Insert Table"
+                    className="p-1.5 rounded-md transition text-gray-500 hover:text-gray-200 hover:bg-gray-800"
+                >
+                    <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path d="M3 3h18v18H3z" />
+                        <path d="M3 9h18" />
+                        <path d="M9 21V9" />
+                        <path d="M9 3v6" />
+                        <path d="M15 3v18" />
+                    </svg>
+                </button>
 
                 {divider}
 
@@ -379,6 +585,87 @@ export default function BlogRichTextEditor({ value, onChange, slug }) {
                     <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M21 7v6h-6" /><path d="M3 17a9 9 0 019-9 9 9 0 016 2.3l3 2.7" /></svg>)}
             </div>
 
+            {/* ── Table Controls ────────────────────────────────────────────────── */}
+            {showTableControls && (
+                <div className="flex items-center gap-1 px-3 py-2 border-b border-gray-800 bg-blue-600/10">
+                    <span className="text-xs text-blue-400 font-medium mr-2">Table:</span>
+
+                    <button
+                        onMouseDown={(e) => { e.preventDefault(); insertRowAbove(); }}
+                        title="Insert Row Above"
+                        className="p-1.5 rounded-md transition text-xs font-bold text-blue-400 hover:text-blue-300 hover:bg-blue-600/20"
+                    >
+                        <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path d="M12 5v14" />
+                            <path d="M5 12h14" />
+                            <path d="M5 5h14v7H5z" />
+                        </svg>
+                    </button>
+
+                    <button
+                        onMouseDown={(e) => { e.preventDefault(); insertRowBelow(); }}
+                        title="Insert Row Below"
+                        className="p-1.5 rounded-md transition text-xs font-bold text-blue-400 hover:text-blue-300 hover:bg-blue-600/20"
+                    >
+                        <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path d="M12 5v14" />
+                            <path d="M5 12h14" />
+                            <path d="M5 12h14v7H5z" />
+                        </svg>
+                    </button>
+
+                    <div className="w-px h-5 bg-gray-600 mx-1" />
+
+                    <button
+                        onMouseDown={(e) => { e.preventDefault(); insertColumnLeft(); }}
+                        title="Insert Column Left"
+                        className="p-1.5 rounded-md transition text-xs font-bold text-blue-400 hover:text-blue-300 hover:bg-blue-600/20"
+                    >
+                        <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path d="M12 3h7v18h-7" />
+                            <path d="M5 12h14" />
+                            <path d="M3 3h7v7H3z" />
+                        </svg>
+                    </button>
+
+                    <button
+                        onMouseDown={(e) => { e.preventDefault(); insertColumnRight(); }}
+                        title="Insert Column Right"
+                        className="p-1.5 rounded-md transition text-xs font-bold text-blue-400 hover:text-blue-300 hover:bg-blue-600/20"
+                    >
+                        <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path d="M5 3h7v18H5" />
+                            <path d="M5 12h14" />
+                            <path d="M14 3h7v7h-7z" />
+                        </svg>
+                    </button>
+
+                    <div className="w-px h-5 bg-gray-600 mx-1" />
+
+                    <button
+                        onMouseDown={(e) => { e.preventDefault(); deleteRow(); }}
+                        title="Delete Row"
+                        className="p-1.5 rounded-md transition text-xs font-bold text-red-400 hover:text-red-300 hover:bg-red-600/20"
+                    >
+                        <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path d="M3 6h18" />
+                            <path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2" />
+                        </svg>
+                    </button>
+
+                    <button
+                        onMouseDown={(e) => { e.preventDefault(); deleteColumn(); }}
+                        title="Delete Column"
+                        className="p-1.5 rounded-md transition text-xs font-bold text-red-400 hover:text-red-300 hover:bg-red-600/20"
+                    >
+                        <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path d="M9 3h6v18H9z" />
+                            <path d="M3 9h18" />
+                        </svg>
+                    </button>
+                </div>
+            )}
+
             {/* ── Editable area ─────────────────────────────────────────────────── */}
             <div
                 ref={editorRef}
@@ -386,7 +673,7 @@ export default function BlogRichTextEditor({ value, onChange, slug }) {
                 suppressContentEditableWarning
                 onInput={handleInput}
                 onPaste={handlePaste}
-                className="min-h-[420px] p-6 text-sm text-gray-200 outline-none leading-relaxed blog-editor"
+                className="h-[420px] overflow-y-auto p-6 text-sm text-gray-200 outline-none leading-relaxed blog-editor"
                 style={{ caretColor: "#60a5fa" }}
                 data-placeholder="Start writing your blog post here…"
             />
@@ -547,6 +834,10 @@ export default function BlogRichTextEditor({ value, onChange, slug }) {
         .blog-editor strong  { color: #f9fafb; }
         .blog-editor em      { color: #e5e7eb; }
         .blog-editor u       { text-underline-offset: 3px; }
+        .blog-editor table   { width: 100%; border-collapse: collapse; margin: 1rem 0; border: 1px solid #374151; }
+        .blog-editor th, .blog-editor td { border: 1px solid #374151; padding: 8px; text-align: left; }
+        .blog-editor th      { background: #1f2937; color: #f9fafb; }
+        .blog-editor td      { color: #d1d5db; }
       `}</style>
         </div>
     );

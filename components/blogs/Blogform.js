@@ -73,7 +73,7 @@ export default function BlogForm({ form, setForm, onReset }) {
                 </div>
 
                 <Field
-                    label="TLDR"
+                    label="Short description"
                     textarea
                     rows={3}
                     value={form.excerpt}
@@ -122,6 +122,17 @@ export default function BlogForm({ form, setForm, onReset }) {
                     />
                 </div>
                 <BlogTagsInput tags={form.tags} onChange={(v) => set("tags", v)} />
+
+                <Field
+                    label="Schema Structured Data (JSON-LD)"
+                    textarea
+                    rows={6}
+                    value={form.schemaStructuredData}
+                    onChange={(v) => set("schemaStructuredData", v)}
+                    placeholder='{"@context": "https://schema.org", "@type": "BlogPosting", ...}'
+                    hint="JSON-LD structured data for SEO (optional)"
+                    mono
+                />
             </Section>
 
             {/* ── AUTHORS ────────────────────────────────────────────────────── */}

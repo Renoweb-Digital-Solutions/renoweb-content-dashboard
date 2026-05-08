@@ -11,7 +11,7 @@ const BLOG_CHECKS = [
     ["Title", (f) => !!f.title],
     ["Slug", (f) => !!f.slug],
     ["Banner Image", (f) => !!f.bannerPreview],
-    ["Excerpt", (f) => !!f.excerpt],
+    ["Short description", (f) => !!f.excerpt],
     ["Content", (f) => f.content && f.content.replace(/<[^>]*>/g, "").trim().length > 50],
     ["Publish Date", (f) => !!f.publishDate],
     ["Primary Author", (f) => !!f.author],
@@ -71,9 +71,9 @@ function CardPreview({ form }) {
                     {form.title || <span className="text-gray-600 italic font-normal">Title will appear here…</span>}
                 </h3>
 
-                {/* Excerpt */}
+                {/* Short description */}
                 <p className="text-xs text-gray-500 line-clamp-2 leading-relaxed">
-                    {form.excerpt || <span className="italic">Excerpt will appear here…</span>}
+                    {form.excerpt || <span className="italic">Short description will appear here…</span>}
                 </p>
 
                 {/* Author row */}
