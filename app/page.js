@@ -67,6 +67,26 @@ const SECTIONS = [
     accent: "cyan",
     status: "live",
   },
+  {
+    id: "authors",
+    href: "/cms/authors",
+    label: "Authors",
+    tag: "PEOPLE",
+    description:
+      "Manage author profiles with bios, designations, and profile photos for case studies, blogs, and research content.",
+    icon: (
+      <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
+          d="M12 4a4 4 0 100 8 4 4 0 000-8zm0 10c-4.418 0-8 1.79-8 4v2h16v-2c0-2.21-3.582-4-8-4z" />
+      </svg>
+    ),
+    stats: [
+      { label: "Profile fields", value: "4" },
+      { label: "Storage", value: "Firebase + Supabase" },
+    ],
+    accent: "violet",
+    status: "live",
+  },
 ];
 
 const QUICK_ACTIONS = [
@@ -94,6 +114,15 @@ const QUICK_ACTIONS = [
     icon: (
       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+      </svg>
+    ),
+  },
+  {
+    label: "Authors",
+    href: "/cms/authors",
+    icon: (
+      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4a4 4 0 100 8 4 4 0 000-8zm0 10c-4.418 0-8 1.79-8 4v2h16v-2c0-2.21-3.582-4-8-4z" />
       </svg>
     ),
   },
@@ -127,6 +156,15 @@ const accentMap = {
     hover: "hover:border-cyan-500/50 hover:bg-cyan-600/[0.07]",
     badge: "bg-cyan-600/20 text-cyan-400 border-cyan-600/30",
     glow: "shadow-cyan-600/10",
+  },
+  violet: {
+    border: "border-violet-600/30",
+    bg: "bg-violet-600/10",
+    text: "text-violet-400",
+    dot: "bg-violet-500",
+    hover: "hover:border-violet-500/50 hover:bg-violet-600/[0.07]",
+    badge: "bg-violet-600/20 text-violet-400 border-violet-600/30",
+    glow: "shadow-violet-600/10",
   },
 };
 
