@@ -149,7 +149,7 @@ function UpdateModal({ entry, onClose, onSave, saving }) {
                     </div>
 
                     <div>
-                        <label className="mb-1.5 block text-xs font-medium text-gray-400">Excerpt</label>
+                        <label className="mb-1.5 block text-xs font-medium text-gray-400">Short description</label>
                         <textarea
                             rows={4}
                             value={form.excerpt}
@@ -401,7 +401,7 @@ export default function BlogManage() {
         try {
             setSaving(true);
             setLoading(true);
-            
+
             const result = await saveBlog(updatedEntry, {
                 originalSlug: editEntry.slug,
                 confirmOverwrite: async () =>
@@ -490,7 +490,7 @@ export default function BlogManage() {
                     <input
                         value={search}
                         onChange={(event) => setSearch(event.target.value)}
-                        placeholder="Search title or excerpt..."
+                        placeholder="Search title or short description..."
                         className="w-full rounded-xl border border-gray-800 bg-gray-900/50 py-2.5 pl-10 pr-4 text-sm text-gray-200 outline-none transition focus:border-blue-500/60"
                     />
                 </div>
