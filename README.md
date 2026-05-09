@@ -8,6 +8,36 @@ A modern CMS for creating, managing, and publishing case studies with:
 
 ---
 
+# 🛠️ Developer Setup & Onboarding
+
+## 1. Environment Variables (Doppler)
+We use [Doppler](https://www.doppler.com/) to manage our environment variables. Transferring `.env` files manually over Slack or email is a hassle and a massive security risk. Doppler acts as a centralized, encrypted vault for our secrets.
+
+**To set up your local environment:**
+1. Install the Doppler CLI: `brew install dopplerhq/cli/doppler` (Mac) or `scoop install doppler` (Windows)
+2. Authenticate your machine: `doppler login`
+3. Link your local project: `doppler setup`
+4. Run the development server using Doppler to securely inject the variables into Next.js:
+   ```bash
+   doppler run -- npm run dev
+   ```
+*(Do not create local `.env` files containing production or sensitive service account keys).*
+
+---
+
+## 2. Authentication Architecture
+Before touching any code related to login, user management, or the CMS dashboard, you **must** understand how our security layers work.
+
+👉 **[Read the Auth.md Guide Here](./Auth.md)**
+
+It contains critical, required reading regarding:
+* Our hybrid Client/Admin Firebase SDK architecture.
+* The Next.js Edge Middleware protecting our routes via `httpOnly` cookies.
+* How to safely use the `useAuth` hook and the `authReady` hydration flag.
+* Cybersecurity safeguards preventing XSS and unauthorized access.
+
+---
+
 # 🏗️ Architecture Overview
 
 ```
@@ -306,7 +336,7 @@ Must NOT contain:
 - ✏️ Edit existing case studies
 - 🗑️ Delete case + image
 - 🧠 Auto image compression
-- 🔐 Auth-based CMS access
+- ✅ Auth-based CMS access (Completed)
 - 📊 Analytics dashboard
 
 ---
