@@ -166,22 +166,88 @@ export default function AuthorSelector({
             {error ? <p className="text-sm text-red-400">{error}</p> : null}
 
             {showModal && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4">
-                    <div className="w-full max-w-2xl rounded-3xl border border-gray-800 bg-gray-950 p-6 shadow-2xl">
-                        <div className="flex items-start justify-between gap-4">
+                <div
+                    className="fixed inset-0 z-50 flex items-center justify-center p-4"
+                    style={{ background: "rgba(0,0,0,0.75)", backdropFilter: "blur(6px)" }}
+                    onClick={(e) => { if (e.target === e.currentTarget) setShowModal(false); }}
+                >
+                    <div
+                        className="relative w-full max-w-lg flex flex-col"
+                        style={{
+                            maxHeight: "90vh",
+                            borderRadius: "1.5rem",
+                            background: "rgba(10, 14, 28, 0.85)",
+                            backdropFilter: "blur(20px) saturate(1.4)",
+                            border: "1px solid rgba(59, 130, 246, 0.25)",
+                            boxShadow: "0 0 0 1px rgba(59,130,246,0.08), 0 32px 64px -16px rgba(0,0,0,0.8), 0 0 80px -20px rgba(59,130,246,0.15)",
+                        }}
+                    >
+                        {/* Glowing top accent line */}
+                        <div
+                            style={{
+                                position: "absolute",
+                                top: 0,
+                                left: "10%",
+                                right: "10%",
+                                height: "1px",
+                                borderRadius: "100%",
+                                background: "linear-gradient(90deg, transparent, rgba(59,130,246,0.7), transparent)",
+                            }}
+                        />
+
+                        {/* Header */}
+                        <div className="flex items-center justify-between gap-4 px-6 pt-5 pb-4"
+                            style={{ borderBottom: "1px solid rgba(59,130,246,0.1)" }}
+                        >
                             <div>
-                                <h2 className="text-xl font-semibold text-white">Create author</h2>
-                                <p className="text-sm text-gray-500">Add a name, designation, bio, and profile image.</p>
+                                <div className="flex items-center gap-2">
+                                    <span
+                                        style={{
+                                            display: "inline-flex",
+                                            alignItems: "center",
+                                            justifyContent: "center",
+                                            width: 28,
+                                            height: 28,
+                                            borderRadius: "0.5rem",
+                                            background: "rgba(59,130,246,0.15)",
+                                            border: "1px solid rgba(59,130,246,0.25)",
+                                        }}
+                                    >
+                                        <svg width="14" height="14" viewBox="0 0 20 20" fill="none">
+                                            <path d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" fill="rgba(96,165,250,1)" />
+                                        </svg>
+                                    </span>
+                                    <h2 className="text-base font-semibold text-white">Create author</h2>
+                                </div>
+                                <p className="mt-1 text-xs text-gray-500 pl-9">Fill in the details to add a new author to the CMS.</p>
                             </div>
                             <button
                                 type="button"
                                 onClick={() => setShowModal(false)}
-                                className="rounded-full border border-gray-700 bg-gray-900/80 p-2 text-gray-400 hover:text-white"
+                                style={{
+                                    display: "flex",
+                                    alignItems: "center",
+                                    justifyContent: "center",
+                                    width: 30,
+                                    height: 30,
+                                    borderRadius: "50%",
+                                    border: "1px solid rgba(75,85,99,0.6)",
+                                    background: "rgba(17,24,39,0.8)",
+                                    color: "#9ca3af",
+                                    cursor: "pointer",
+                                    flexShrink: 0,
+                                    fontSize: 13,
+                                    transition: "all 0.15s",
+                                }}
+                                onMouseEnter={(e) => { e.currentTarget.style.color = "#fff"; e.currentTarget.style.borderColor = "rgba(59,130,246,0.5)"; }}
+                                onMouseLeave={(e) => { e.currentTarget.style.color = "#9ca3af"; e.currentTarget.style.borderColor = "rgba(75,85,99,0.6)"; }}
                             >
                                 ✕
                             </button>
                         </div>
-                        <div className="mt-6">
+
+                        {/* Scrollable body */}
+                        <div className="overflow-y-auto flex-1 px-6 py-5" style={{ overflowY: "auto" }}>
                             <AuthorForm
                                 initialAuthor={null}
                                 onSubmit={handleCreateAuthor}
