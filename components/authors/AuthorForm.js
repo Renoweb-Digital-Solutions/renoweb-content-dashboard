@@ -96,115 +96,197 @@ export default function AuthorForm({ initialAuthor = null, onSubmit, onClose, su
     };
 
     return (
-        <div className="space-y-5 rounded-3xl border border-gray-800 bg-gray-900/80 p-6">
-            <div className="flex items-center justify-between gap-4">
-                <div>
-                    <h2 className="text-lg font-semibold text-white">{initialAuthor ? "Edit author" : "Add new author"}</h2>
-                    <p className="text-sm text-gray-400">Name, designation, bio, and profile picture.</p>
+        <div className="space-y-4">
+            {/* Name + Designation row */}
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                <div className="grid gap-1.5">
+                    <label className="block text-[11px] font-semibold uppercase tracking-wider text-gray-400">Name</label>
+                    <input
+                        type="text"
+                        value={name}
+                        onChange={(event) => setName(event.target.value)}
+                        style={{
+                            background: "rgba(15,23,42,0.6)",
+                            border: "1px solid rgba(59,130,246,0.15)",
+                            borderRadius: "0.75rem",
+                            padding: "10px 14px",
+                            fontSize: "0.8125rem",
+                            color: "#fff",
+                            outline: "none",
+                            width: "100%",
+                            transition: "border-color 0.15s",
+                        }}
+                        onFocus={(e) => (e.currentTarget.style.borderColor = "rgba(59,130,246,0.6)")}
+                        onBlur={(e) => (e.currentTarget.style.borderColor = "rgba(59,130,246,0.15)")}
+                        placeholder="Author full name"
+                        disabled={disabled || submitting}
+                    />
                 </div>
-                <div className="text-right text-xs text-gray-500">
-                    {bio.length}/500
+                <div className="grid gap-1.5">
+                    <label className="block text-[11px] font-semibold uppercase tracking-wider text-gray-400">Designation</label>
+                    <input
+                        type="text"
+                        value={role}
+                        onChange={(event) => setRole(event.target.value)}
+                        style={{
+                            background: "rgba(15,23,42,0.6)",
+                            border: "1px solid rgba(59,130,246,0.15)",
+                            borderRadius: "0.75rem",
+                            padding: "10px 14px",
+                            fontSize: "0.8125rem",
+                            color: "#fff",
+                            outline: "none",
+                            width: "100%",
+                            transition: "border-color 0.15s",
+                        }}
+                        onFocus={(e) => (e.currentTarget.style.borderColor = "rgba(59,130,246,0.6)")}
+                        onBlur={(e) => (e.currentTarget.style.borderColor = "rgba(59,130,246,0.15)")}
+                        placeholder="Founder, Research Lead…"
+                        disabled={disabled || submitting}
+                    />
                 </div>
             </div>
 
-            <div className="grid gap-4">
-                <label className="block text-xs font-semibold text-gray-300">Name</label>
-                <input
-                    type="text"
-                    value={name}
-                    onChange={(event) => setName(event.target.value)}
-                    className="w-full rounded-2xl border border-gray-800 bg-gray-950/50 px-4 py-3 text-sm text-white outline-none transition focus:border-blue-500"
-                    placeholder="Author full name"
-                    disabled={disabled || submitting}
-                />
-            </div>
-
-            <div className="grid gap-4">
-                <label className="block text-xs font-semibold text-gray-300">Designation</label>
-                <input
-                    type="text"
-                    value={role}
-                    onChange={(event) => setRole(event.target.value)}
-                    className="w-full rounded-2xl border border-gray-800 bg-gray-950/50 px-4 py-3 text-sm text-white outline-none transition focus:border-blue-500"
-                    placeholder="Founder, Head of Product, Research Lead"
-                    disabled={disabled || submitting}
-                />
-            </div>
-
-            <div className="grid gap-4">
-                <label className="block text-xs font-semibold text-gray-300">Short bio</label>
+            {/* Bio */}
+            <div className="grid gap-1.5">
+                <div className="flex items-center justify-between">
+                    <label className="block text-[11px] font-semibold uppercase tracking-wider text-gray-400">Short bio</label>
+                    <span style={{ fontSize: "10px", color: bio.length > 450 ? "#f87171" : "#6b7280" }}>{bio.length}/500</span>
+                </div>
                 <textarea
                     value={bio}
                     onChange={(event) => setBio(event.target.value)}
-                    className="min-h-[120px] w-full rounded-2xl border border-gray-800 bg-gray-950/50 px-4 py-3 text-sm text-white outline-none transition focus:border-blue-500"
+                    style={{
+                        background: "rgba(15,23,42,0.6)",
+                        border: "1px solid rgba(59,130,246,0.15)",
+                        borderRadius: "0.75rem",
+                        padding: "10px 14px",
+                        fontSize: "0.8125rem",
+                        color: "#fff",
+                        outline: "none",
+                        width: "100%",
+                        minHeight: "80px",
+                        resize: "vertical",
+                        transition: "border-color 0.15s",
+                    }}
+                    onFocus={(e) => (e.currentTarget.style.borderColor = "rgba(59,130,246,0.6)")}
+                    onBlur={(e) => (e.currentTarget.style.borderColor = "rgba(59,130,246,0.15)")}
                     placeholder="Describe the author in 500 characters or fewer."
                     maxLength={500}
                     disabled={disabled || submitting}
                 />
             </div>
 
-            <div className="grid gap-4">
-                <label className="block text-xs font-semibold text-gray-300">LinkedIn profile (optional)</label>
-                <input
-                    type="url"
-                    value={linkedin}
-                    onChange={(event) => setLinkedin(event.target.value)}
-                    className="w-full rounded-2xl border border-gray-800 bg-gray-950/50 px-4 py-3 text-sm text-white outline-none transition focus:border-blue-500"
-                    placeholder="https://www.linkedin.com/in/username"
-                    disabled={disabled || submitting}
-                />
+            {/* Social links — 2 columns */}
+            <div className="grid gap-1.5">
+                <label className="block text-[11px] font-semibold uppercase tracking-wider text-gray-400">Social profiles <span style={{ color: "#4b5563", fontWeight: 400, textTransform: "none", letterSpacing: 0 }}>(optional)</span></label>
+                <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
+                    {[
+                        { val: linkedin, set: setLinkedin, placeholder: "linkedin.com/in/…", icon: "in" },
+                        { val: x, set: setX, placeholder: "x.com/username", icon: "𝕏" },
+                        { val: instagram, set: setInstagram, placeholder: "instagram.com/…", icon: "ig" },
+                    ].map(({ val, set, placeholder, icon }) => (
+                        <div key={icon} style={{ position: "relative" }}>
+                            <span style={{
+                                position: "absolute", left: 10, top: "50%", transform: "translateY(-50%)",
+                                fontSize: 10, fontWeight: 700, color: "rgba(96,165,250,0.7)", pointerEvents: "none", userSelect: "none",
+                            }}>{icon}</span>
+                            <input
+                                type="url"
+                                value={val}
+                                onChange={(event) => set(event.target.value)}
+                                style={{
+                                    background: "rgba(15,23,42,0.6)",
+                                    border: "1px solid rgba(59,130,246,0.12)",
+                                    borderRadius: "0.75rem",
+                                    padding: "9px 12px 9px 28px",
+                                    fontSize: "0.75rem",
+                                    color: "#fff",
+                                    outline: "none",
+                                    width: "100%",
+                                    transition: "border-color 0.15s",
+                                }}
+                                onFocus={(e) => (e.currentTarget.style.borderColor = "rgba(59,130,246,0.6)")}
+                                onBlur={(e) => (e.currentTarget.style.borderColor = "rgba(59,130,246,0.12)")}
+                                placeholder={placeholder}
+                                disabled={disabled || submitting}
+                            />
+                        </div>
+                    ))}
+                </div>
             </div>
 
-            <div className="grid gap-4">
-                <label className="block text-xs font-semibold text-gray-300">X profile (optional)</label>
-                <input
-                    type="url"
-                    value={x}
-                    onChange={(event) => setX(event.target.value)}
-                    className="w-full rounded-2xl border border-gray-800 bg-gray-950/50 px-4 py-3 text-sm text-white outline-none transition focus:border-blue-500"
-                    placeholder="https://x.com/username"
-                    disabled={disabled || submitting}
-                />
-            </div>
-
-            <div className="grid gap-4">
-                <label className="block text-xs font-semibold text-gray-300">Instagram profile (optional)</label>
-                <input
-                    type="url"
-                    value={instagram}
-                    onChange={(event) => setInstagram(event.target.value)}
-                    className="w-full rounded-2xl border border-gray-800 bg-gray-950/50 px-4 py-3 text-sm text-white outline-none transition focus:border-blue-500"
-                    placeholder="https://www.instagram.com/username"
-                    disabled={disabled || submitting}
-                />
-            </div>
-
-            <div className="grid gap-3">
-                <label className="block text-xs font-semibold text-gray-300">Profile picture</label>
-                <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-                    <label className="flex h-16 w-16 items-center justify-center rounded-3xl border border-dashed border-gray-700 bg-gray-950/70 text-xs text-gray-500 hover:border-blue-500 hover:text-blue-300 transition cursor-pointer">
+            {/* Profile picture */}
+            <div className="grid gap-2">
+                <label className="block text-[11px] font-semibold uppercase tracking-wider text-gray-400">Profile picture</label>
+                <div className="flex items-center gap-3">
+                    <label
+                        style={{
+                            display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
+                            width: 60, height: 60, borderRadius: "50%",
+                            border: "1.5px dashed rgba(59,130,246,0.3)",
+                            background: "rgba(15,23,42,0.6)",
+                            color: "#6b7280", fontSize: 10, cursor: "pointer",
+                            transition: "all 0.15s", flexShrink: 0,
+                        }}
+                        onMouseEnter={(e) => { e.currentTarget.style.borderColor = "rgba(59,130,246,0.7)"; e.currentTarget.style.color = "#93c5fd"; }}
+                        onMouseLeave={(e) => { e.currentTarget.style.borderColor = "rgba(59,130,246,0.3)"; e.currentTarget.style.color = "#6b7280"; }}
+                    >
                         <input type="file" accept="image/*" className="hidden" onChange={handleFileChange} disabled={disabled || submitting} />
+                        <svg width="16" height="16" viewBox="0 0 20 20" fill="none" style={{ marginBottom: 2 }}>
+                            <path d="M4 16l4-4 3 3 4-5 5 6H4z" stroke="currentColor" strokeWidth="1.4" strokeLinejoin="round" />
+                        </svg>
                         Upload
                     </label>
-                    <div className="min-h-[64px] min-w-[64px] overflow-hidden rounded-3xl border border-gray-800 bg-gray-900/80">
+                    <div style={{
+                        width: 60, height: 60, borderRadius: "50%", overflow: "hidden",
+                        border: "1.5px solid rgba(59,130,246,0.2)",
+                        background: "rgba(15,23,42,0.7)",
+                        display: "flex", alignItems: "center", justifyContent: "center",
+                        flexShrink: 0,
+                    }}>
                         {profilePreview ? (
-                            <img src={profilePreview} alt="Preview" className="h-16 w-16 object-cover" />
+                            <img src={profilePreview} alt="Preview" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
                         ) : (
-                            <div className="flex h-16 w-16 items-center justify-center text-[10px] text-gray-500">No image</div>
+                            <span style={{ fontSize: 9, color: "#4b5563" }}>No image</span>
                         )}
                     </div>
+                    <p style={{ fontSize: 10, color: "#4b5563", lineHeight: 1.4 }}>
+                        Stored in Supabase.<br />JPG, PNG, WebP · max 2 MB.
+                    </p>
                 </div>
-                <p className="text-[11px] text-gray-500">Profile images are stored in Supabase and referenced by the author record.</p>
             </div>
 
-            {error ? <p className="text-sm text-red-400">{error}</p> : null}
+            {error ? (
+                <div style={{
+                    background: "rgba(239,68,68,0.08)", border: "1px solid rgba(239,68,68,0.2)",
+                    borderRadius: "0.75rem", padding: "8px 12px", fontSize: "0.8125rem", color: "#fca5a5",
+                }}>
+                    {error}
+                </div>
+            ) : null}
 
-            <div className="flex flex-col gap-3 sm:flex-row sm:justify-between sm:items-center">
+            {/* Actions */}
+            <div style={{ display: "flex", gap: 8, paddingTop: 4 }}>
                 <button
                     type="button"
                     onClick={handleSubmit}
                     disabled={disabled || submitting}
-                    className="inline-flex items-center justify-center rounded-2xl bg-blue-600 px-5 py-3 text-sm font-semibold text-white transition hover:bg-blue-500 disabled:cursor-not-allowed disabled:opacity-50"
+                    style={{
+                        flex: 1,
+                        display: "inline-flex", alignItems: "center", justifyContent: "center",
+                        borderRadius: "0.75rem",
+                        background: submitting ? "rgba(59,130,246,0.5)" : "linear-gradient(135deg, #2563eb 0%, #3b82f6 100%)",
+                        border: "1px solid rgba(59,130,246,0.4)",
+                        boxShadow: "0 4px 14px rgba(59,130,246,0.25)",
+                        padding: "10px 16px",
+                        fontSize: "0.8125rem", fontWeight: 600, color: "#fff",
+                        cursor: disabled || submitting ? "not-allowed" : "pointer",
+                        opacity: disabled || submitting ? 0.6 : 1,
+                        transition: "all 0.15s",
+                    }}
+                    onMouseEnter={(e) => { if (!disabled && !submitting) e.currentTarget.style.boxShadow = "0 4px 20px rgba(59,130,246,0.4)"; }}
+                    onMouseLeave={(e) => { e.currentTarget.style.boxShadow = "0 4px 14px rgba(59,130,246,0.25)"; }}
                 >
                     {submitting ? "Saving…" : submitLabel}
                 </button>
@@ -212,7 +294,18 @@ export default function AuthorForm({ initialAuthor = null, onSubmit, onClose, su
                     type="button"
                     onClick={resetForm}
                     disabled={disabled || submitting}
-                    className="rounded-2xl border border-gray-800 bg-gray-950/80 px-5 py-3 text-sm font-semibold text-gray-300 transition hover:border-gray-600 hover:text-white disabled:cursor-not-allowed disabled:opacity-50"
+                    style={{
+                        borderRadius: "0.75rem",
+                        border: "1px solid rgba(75,85,99,0.5)",
+                        background: "rgba(17,24,39,0.7)",
+                        padding: "10px 14px",
+                        fontSize: "0.8125rem", fontWeight: 500, color: "#9ca3af",
+                        cursor: disabled || submitting ? "not-allowed" : "pointer",
+                        opacity: disabled || submitting ? 0.5 : 1,
+                        transition: "all 0.15s",
+                    }}
+                    onMouseEnter={(e) => { if (!disabled && !submitting) { e.currentTarget.style.borderColor = "rgba(59,130,246,0.4)"; e.currentTarget.style.color = "#e5e7eb"; } }}
+                    onMouseLeave={(e) => { e.currentTarget.style.borderColor = "rgba(75,85,99,0.5)"; e.currentTarget.style.color = "#9ca3af"; }}
                 >
                     Reset
                 </button>
@@ -220,7 +313,17 @@ export default function AuthorForm({ initialAuthor = null, onSubmit, onClose, su
                     type="button"
                     onClick={onClose}
                     disabled={disabled || submitting}
-                    className="text-sm font-semibold text-gray-400 hover:text-gray-200"
+                    style={{
+                        borderRadius: "0.75rem",
+                        border: "1px solid transparent",
+                        background: "transparent",
+                        padding: "10px 14px",
+                        fontSize: "0.8125rem", fontWeight: 500, color: "#6b7280",
+                        cursor: disabled || submitting ? "not-allowed" : "pointer",
+                        transition: "color 0.15s",
+                    }}
+                    onMouseEnter={(e) => { if (!disabled && !submitting) e.currentTarget.style.color = "#d1d5db"; }}
+                    onMouseLeave={(e) => { e.currentTarget.style.color = "#6b7280"; }}
                 >
                     Cancel
                 </button>
@@ -228,3 +331,4 @@ export default function AuthorForm({ initialAuthor = null, onSubmit, onClose, su
         </div>
     );
 }
+
