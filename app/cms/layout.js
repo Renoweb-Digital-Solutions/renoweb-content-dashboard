@@ -2,6 +2,7 @@ import { redirect } from 'next/navigation';
 import { cookies } from 'next/headers';
 import { adminAuth, adminDb } from '@/lib/firebase-admin';
 import AuthProvider from '@/lib/AuthContext';
+import CMSNavbar from '@/components/CMSNavbar';
 
 /**
  * CMS Layout (Server Component)
@@ -21,6 +22,7 @@ export default async function CMSLayout({ children }) {
   }
 
   let user = null;
+  let redirectUrl = null;
 
   try {
     // 2. Cryptographically verify the session token using Firebase Admin SDK.
@@ -34,26 +36,31 @@ export default async function CMSLayout({ children }) {
 
     // Security Check: If they are in Auth but not in our Firestore, kick them out.
     if (!userDoc.exists) {
-      redirect('/login');
-    }
+      redirectUrl = '/login';
+    } else {
+      // Attach the uid to the Firestore data so the client has the full picture.
+      user = { uid, ...userDoc.data() };
 
-    // Attach the uid to the Firestore data so the client has the full picture.
-    user = { uid, ...userDoc.data() };
-
-    // Security Check: If an Admin manually deactivated them, kick them out instantly.
-    if (!user.active) {
-      redirect('/login?error=account_disabled');
+      // Security Check: If an Admin manually deactivated them, kick them out instantly.
+      if (!user.active) {
+        redirectUrl = '/login?error=account_disabled';
+      }
     }
   } catch (error) {
     console.error('Session verification error:', error);
     // Invalid or expired session cookie
-    redirect('/login');
+    redirectUrl = '/login';
+  }
+
+  if (redirectUrl) {
+    redirect(redirectUrl);
   }
 
   return (
     // Hydration: We pass the verified `user` object down to the Client Context Provider.
     // This allows client components to access `{ user }` instantly without a loading screen.
     <AuthProvider initialUser={user}>
+      <CMSNavbar />
       {children}
     </AuthProvider>
   );

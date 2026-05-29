@@ -1,9 +1,6 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { useAuth } from "@/lib/AuthContext";
 
 // ── Data ──────────────────────────────────────────────────────────────────────
 const SECTIONS = [
@@ -169,14 +166,17 @@ const accentMap = {
 };
 
 // ── Sub-components ────────────────────────────────────────────────────────────
-function SectionCard({ section, onClick }) {
+function SectionCard({ section }) {
   const a = accentMap[section.accent];
   const isLive = section.status === "live";
 
+  const CardWrapper = isLive ? Link : "div";
+  const wrapperProps = isLive ? { href: section.href } : {};
+
   return (
-    <button
-      onClick={() => isLive && onClick(section.href)}
-      className={`group relative text-left w-full rounded-2xl border bg-gray-900/40 p-7 transition-all duration-300 ${a.border} ${isLive ? `${a.hover} cursor-pointer shadow-xl ${a.glow}` : "opacity-60 cursor-default"}`}
+    <CardWrapper
+      {...wrapperProps}
+      className={`group relative text-left w-full block rounded-2xl border bg-gray-900/40 p-7 transition-all duration-300 ${a.border} ${isLive ? `${a.hover} cursor-pointer shadow-xl ${a.glow}` : "opacity-60 cursor-default"}`}
     >
       {/* Top row */}
       <div className="flex items-start justify-between mb-6">
@@ -233,66 +233,26 @@ function SectionCard({ section, onClick }) {
       {isLive && (
         <span className={`absolute inset-x-0 top-0 h-px ${a.dot} opacity-0 group-hover:opacity-60 transition-opacity duration-300 rounded-t-2xl`} />
       )}
-    </button>
+    </CardWrapper>
   );
 }
 
-function QuickActionButton({ action, onClick }) {
+function QuickActionButton({ action }) {
   return (
-    <button
-      onClick={() => onClick(action.href)}
+    <Link
+      href={action.href}
       className="flex items-center gap-2 px-4 py-2.5 rounded-xl border border-gray-800 bg-gray-900/50 text-xs font-semibold text-gray-400 hover:border-blue-600/40 hover:text-blue-400 hover:bg-blue-600/[0.07] transition-all duration-200"
     >
       <span className="text-blue-600">{action.icon}</span>
       {action.label}
-    </button>
+    </Link>
   );
 }
 
 // ── Main component ────────────────────────────────────────────────────────────
 export default function Dashboard() {
-  const router = useRouter();
-  const { user, logout } = useAuth();
-  
-  const navigate = (href) => {
-    router.push(href);
-  };
-
   return (
     <div className="min-h-screen bg-black text-white">
-      {/* ── Top Bar with Auth State ────────────────────────────────────────── */}
-      <div className="border-b border-gray-800 bg-gray-900/40 backdrop-blur-md sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <div className="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center font-bold text-white shadow-lg shadow-blue-600/20">
-              R
-            </div>
-            <span className="font-semibold tracking-wide hidden sm:block text-gray-300">CMS Dashboard</span>
-          </div>
-          
-          <div className="flex items-center gap-4">
-            {user && (
-              <>
-                <div className="hidden sm:flex flex-col items-end mr-2">
-                  <span className="text-sm font-medium text-white">{user.email}</span>
-                  <span className="text-[10px] uppercase tracking-wider text-blue-400 font-bold">{user.role}</span>
-                </div>
-                {user.role === 'admin' && (
-                  <Link href="/cms/users" className="px-3 py-1.5 text-xs font-medium rounded-lg border border-indigo-500/30 text-indigo-400 bg-indigo-500/10 hover:bg-indigo-500/20 transition-colors">
-                    Manage Users
-                  </Link>
-                )}
-                <button 
-                  onClick={logout}
-                  className="px-4 py-1.5 text-xs font-semibold rounded-lg bg-red-500/10 text-red-400 hover:bg-red-500/20 border border-red-500/20 transition-colors"
-                >
-                  Sign out
-                </button>
-              </>
-            )}
-          </div>
-        </div>
-      </div>
 
       {/* ── Hero ───────────────────────────────────────────────────────────── */}
       <div className="max-w-7xl mx-auto px-6 pt-12 pb-14">
@@ -318,7 +278,7 @@ export default function Dashboard() {
           {/* Quick actions */}
           <div className="flex flex-wrap gap-2 lg:justify-end">
             {QUICK_ACTIONS.map((a) => (
-              <QuickActionButton key={a.label} action={a} onClick={navigate} />
+              <QuickActionButton key={a.label} action={a} />
             ))}
           </div>
         </div>
@@ -329,7 +289,7 @@ export default function Dashboard() {
         {/* ── Section Cards ──────────────────────────────────────────────── */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 mb-16">
           {SECTIONS.map((s) => (
-            <SectionCard key={s.id} section={s} onClick={navigate} />
+            <SectionCard key={s.id} section={s} />
           ))}
         </div>
 

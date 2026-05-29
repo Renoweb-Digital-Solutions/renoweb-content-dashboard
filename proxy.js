@@ -11,7 +11,7 @@ import { NextResponse } from 'next/server';
  * HOW: It runs on Vercel's Edge network. It parses the incoming HTTP request headers to 
  * look for our custom 'session' cookie (which is set by the login API).
  */
-export function middleware(request) {
+export function proxy(request) {
   // Extract the 'session' cookie. This is an httpOnly cookie, meaning client-side JS can't see it.
   const session = request.cookies.get('session');
   

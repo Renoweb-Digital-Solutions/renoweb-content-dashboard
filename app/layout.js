@@ -1,6 +1,5 @@
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import CMSNavbar from "@/components/CMSNavbar";
 import { NetworkProvider } from "@/lib/networkContext";
 
 const geistSans = Geist({
@@ -26,8 +25,6 @@ export default function RootLayout({ children }) {
     >
       <body className="min-h-full flex flex-col">
         <NetworkProvider>
-
-          <CMSNavbar />
           {children}
         </NetworkProvider>
       </body>
