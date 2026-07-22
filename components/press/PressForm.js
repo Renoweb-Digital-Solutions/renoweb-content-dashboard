@@ -122,6 +122,24 @@ export default function PressForm({ form, setForm, onReset }) {
                             className="w-full bg-gray-900/50 border border-gray-800 focus:border-blue-600/60 rounded-lg px-4 py-3 text-sm text-gray-200 outline-none transition"
                         />
                     </div>
+                    <div className="flex items-center pl-1 sm:pl-4 mt-6 sm:mt-0">
+                        <label className="flex items-center gap-3 cursor-pointer group">
+                            <div className="relative">
+                                <input
+                                    type="checkbox"
+                                    className="sr-only"
+                                    checked={form.isFeatured}
+                                    onChange={(e) => set("isFeatured", e.target.checked)}
+                                />
+                                <div className={`block w-11 h-6 rounded-full transition-colors duration-300 ${form.isFeatured ? 'bg-blue-600' : 'bg-gray-800 group-hover:bg-gray-700'}`}></div>
+                                <div className={`absolute left-1 top-1 bg-white w-4 h-4 rounded-full transition-transform duration-300 ${form.isFeatured ? 'translate-x-5' : ''}`}></div>
+                            </div>
+                            <div className="flex flex-col">
+                                <span className={`text-sm font-semibold transition-colors ${form.isFeatured ? 'text-blue-400' : 'text-gray-300 group-hover:text-gray-200'}`}>Featured Press</span>
+                                <span className="text-[10px] text-gray-500 leading-tight">Only one can be featured.<br/>Overwrites previous.</span>
+                            </div>
+                        </label>
+                    </div>
                 </div>
             </Section>
 

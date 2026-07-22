@@ -11,7 +11,7 @@ import BlogJsonModal from "@/components/blogs/Blogjsonmodal";
 import { initBlogForm } from "@/components/blogs/Blogconstants";
 
 import { useNetwork } from "@/lib/networkContext";
-import { saveBlog } from "@/lib/blogs";
+import { saveBlog, validateBlogForm } from "@/lib/blogs";
 
 
 export function BlogPageContent({ initialTab = "new" }) {
@@ -23,6 +23,12 @@ export function BlogPageContent({ initialTab = "new" }) {
 
     // ── Save / Publish ──────────────────────────────────────────────────────────
     const handleSave = async () => {
+        const error = validateBlogForm(form);
+        if (error) {
+            alert(error);
+            return;
+        }
+
         try {
             setLoading(true);
 
@@ -30,6 +36,11 @@ export function BlogPageContent({ initialTab = "new" }) {
                 confirmOverwrite: async () =>
                     window.confirm("A blog post with this slug already exists. Overwrite?"),
             });
+
+            if (result?.error) {
+                alert(result.error);
+                return;
+            }
 
             if (result?.cancelled) {
                 return;

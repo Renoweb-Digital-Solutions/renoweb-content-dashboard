@@ -5,7 +5,7 @@ import PressForm from "@/components/press/PressForm";
 import PressSidebarPreview from "@/components/press/PressSidebarPreview";
 import PressManage from "@/components/press/PressManage";
 import { useNetwork } from "@/lib/networkContext";
-import { savePress } from "@/lib/press";
+import { savePress, validatePressForm } from "@/lib/press";
 
 const initForm = () => ({
     id: "",
@@ -19,6 +19,7 @@ const initForm = () => ({
     logoFile: null,
     logoPreview: null,
     logoUrl: "",
+    isFeatured: false,
 });
 
 export default function PressPage() {
@@ -27,9 +28,19 @@ export default function PressPage() {
     const { loading, setLoading, setSaved } = useNetwork();
 
     const handleSave = async () => {
+        const error = validatePressForm(form);
+        if (error) {
+            alert(error);
+            return;
+        }
+
+        setLoading(true);
         try {
-            setLoading(true);
-            await savePress(form, form.id);
+            const result = await savePress(form, form.id);
+            if (result?.error) {
+                alert(result.error);
+                return;
+            }
             setSaved(true);
             setForm(initForm());
             setActiveTab("manage");
@@ -55,6 +66,7 @@ export default function PressPage() {
             logoFile: null,
             logoPreview: entry.logoUrl || null,
             logoUrl: entry.logoUrl || "",
+            isFeatured: entry.isFeatured || false,
         });
         setActiveTab("new");
     };
