@@ -41,7 +41,7 @@ const SECTIONS = [
       { label: "Categories", value: "8" },
       { label: "Authors", value: "3" },
     ],
-    accent: "indigo",
+    accent: "blue",
     status: "live",
   },
   {
@@ -61,7 +61,7 @@ const SECTIONS = [
       { label: "Report types", value: "4" },
       { label: "Data fields", value: "12+" },
     ],
-    accent: "cyan",
+    accent: "blue",
     status: "live",
   },
   {
@@ -81,7 +81,27 @@ const SECTIONS = [
       { label: "Profile fields", value: "4" },
       { label: "Storage", value: "Firebase + Supabase" },
     ],
-    accent: "violet",
+    accent: "blue",
+    status: "live",
+  },
+  {
+    id: "press",
+    href: "/cms/press",
+    label: "Press & Media",
+    tag: "PR & MEDIA",
+    description:
+      "Manage external press features, media links, and news coverage with direct publisher logos and structured metadata.",
+    icon: (
+      <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
+              d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9.5a2.5 2.5 0 00-2.5-2.5H15M9 11l3 3m0 0l3-3m-3 3V8" />
+      </svg>
+    ),
+    stats: [
+      { label: "Publishers", value: "Tracked" },
+      { label: "Storage", value: "Supabase" },
+    ],
+    accent: "blue",
     status: "live",
   },
 ];
@@ -120,6 +140,15 @@ const QUICK_ACTIONS = [
     icon: (
       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4a4 4 0 100 8 4 4 0 000-8zm0 10c-4.418 0-8 1.79-8 4v2h16v-2c0-2.21-3.582-4-8-4z" />
+      </svg>
+    ),
+  },
+  {
+    label: "New Press Entry",
+    href: "/cms/press",
+    icon: (
+      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
       </svg>
     ),
   },
@@ -162,6 +191,15 @@ const accentMap = {
     hover: "hover:border-violet-500/50 hover:bg-violet-600/[0.07]",
     badge: "bg-violet-600/20 text-violet-400 border-violet-600/30",
     glow: "shadow-violet-600/10",
+  },
+  orange: {
+    border: "border-orange-600/30",
+    bg: "bg-orange-600/10",
+    text: "text-orange-400",
+    dot: "bg-orange-500",
+    hover: "hover:border-orange-500/50 hover:bg-orange-600/[0.07]",
+    badge: "bg-orange-600/20 text-orange-400 border-orange-600/30",
+    glow: "shadow-orange-600/10",
   },
 };
 
@@ -209,18 +247,8 @@ function SectionCard({ section }) {
       {/* Description */}
       <p className="text-sm text-gray-500 leading-relaxed mb-6">{section.description}</p>
 
-      {/* Stats row */}
-      <div className="flex items-center gap-6 mb-6 pt-5 border-t border-gray-800">
-        {section.stats.map((s) => (
-          <div key={s.label}>
-            <p className={`text-lg font-bold ${a.text}`}>{s.value}</p>
-            <p className="text-[10px] text-gray-600 uppercase tracking-wider mt-0.5">{s.label}</p>
-          </div>
-        ))}
-      </div>
-
       {/* CTA */}
-      <div className={`flex items-center gap-2 text-sm font-semibold ${isLive ? a.text : "text-gray-600"} transition-all duration-200 ${isLive ? "group-hover:gap-3" : ""}`}>
+      <div className={`flex items-center gap-2 pt-5 border-t border-gray-800 text-sm font-semibold ${isLive ? a.text : "text-gray-600"} transition-all duration-200 ${isLive ? "group-hover:gap-3" : ""}`}>
         {isLive ? "Open editor" : "Coming soon"}
         {isLive && (
           <svg className="w-4 h-4 transition-transform duration-200 group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">

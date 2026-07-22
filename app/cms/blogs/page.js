@@ -55,7 +55,7 @@ export function BlogPageContent({ initialTab = "new" }) {
 
     // ── Render ──────────────────────────────────────────────────────────────────
     return (
-        <div className="max-w-7xl mx-auto px-6 py-10">
+        <div className="w-full max-w-[1600px] mx-auto px-6 lg:px-12 py-10">
             <div className="mb-8 flex w-fit items-center gap-1 rounded-xl border border-gray-800 bg-gray-900/50 p-1">
                 <button
                     onClick={() => setActiveTab("new")}

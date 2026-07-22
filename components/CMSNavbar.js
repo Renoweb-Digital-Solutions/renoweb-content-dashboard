@@ -57,6 +57,16 @@ const NAV_ITEMS = [
             </svg>
         ),
     },
+    {
+        label: "Press & Media",
+        href: "/cms/press",
+        icon: (
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
+                    d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9.5a2.5 2.5 0 00-2.5-2.5H15M9 11l3 3m0 0l3-3m-3 3V8" />
+            </svg>
+        ),
+    },
 ];
 
 // ── Nav link ─────────────────────────────────────────
@@ -253,7 +263,7 @@ export default function CMSNavbar() {
 
                 {/* Left — Logo + Mobile toggle */}
                 <div className="flex items-center gap-2">
-                    <MobileMenu items={NAV_ITEMS} pathname={pathname} isActive={isActive} />
+                    {pathname !== "/cms/dashboard" && <MobileMenu items={NAV_ITEMS} pathname={pathname} isActive={isActive} />}
 
                     <Link
                         href="/cms/dashboard"
@@ -271,14 +281,16 @@ export default function CMSNavbar() {
                     </Link>
 
                     {/* Desktop divider */}
-                    <div className="hidden lg:block w-px h-6 bg-gray-800 mx-2" />
+                    {pathname !== "/cms/dashboard" && <div className="hidden lg:block w-px h-6 bg-gray-800 mx-2" />}
 
                     {/* Desktop nav */}
-                    <nav className="hidden lg:flex items-center gap-0.5">
-                        {NAV_ITEMS.map((item) => (
-                            <NavLink key={item.href} item={item} active={isActive(item.href)} />
-                        ))}
-                    </nav>
+                    {pathname !== "/cms/dashboard" && (
+                        <nav className="hidden lg:flex items-center gap-0.5">
+                            {NAV_ITEMS.map((item) => (
+                                <NavLink key={item.href} item={item} active={isActive(item.href)} />
+                            ))}
+                        </nav>
+                    )}
                 </div>
 
                 {/* Right — Status + User */}

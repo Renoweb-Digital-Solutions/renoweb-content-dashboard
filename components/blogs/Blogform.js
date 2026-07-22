@@ -110,6 +110,7 @@ export default function BlogForm({ form, setForm, onReset }) {
                             type="date"
                             value={form.publishDate}
                             onChange={(e) => set("publishDate", e.target.value)}
+                            style={{ colorScheme: "dark" }}
                             className="w-full bg-gray-900/50 border border-gray-800 focus:border-blue-600/60 rounded-lg px-4 py-3 text-sm text-gray-200 outline-none transition"
                         />
                     </div>
