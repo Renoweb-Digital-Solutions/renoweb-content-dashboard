@@ -64,6 +64,15 @@ export const initCaseStudyForm = () => ({
     featured: false,
     createdAt: "",
     updatedAt: "",
+    seo: {
+        metaTitle: "",
+        metaDescription: "",
+        canonicalUrl: "",
+        ogTitle: "",
+        ogDescription: "",
+        ogImageFile: null,
+        ogImageUrl: "",
+    },
 });
 
 export const DUMMY_CASE_STUDIES = [

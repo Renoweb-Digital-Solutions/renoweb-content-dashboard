@@ -20,6 +20,15 @@ const initForm = () => ({
     logoPreview: null,
     logoUrl: "",
     isFeatured: false,
+    seo: {
+        metaTitle: "",
+        metaDescription: "",
+        canonicalUrl: "",
+        ogTitle: "",
+        ogDescription: "",
+        ogImageFile: null,
+        ogImageUrl: "",
+    },
 });
 
 export default function PressPage() {
@@ -67,6 +76,15 @@ export default function PressPage() {
             logoPreview: entry.logoUrl || null,
             logoUrl: entry.logoUrl || "",
             isFeatured: entry.isFeatured || false,
+            seo: entry.seo || {
+                metaTitle: "",
+                metaDescription: "",
+                canonicalUrl: "",
+                ogTitle: "",
+                ogDescription: "",
+                ogImageFile: null,
+                ogImageUrl: "",
+            },
         });
         setActiveTab("new");
     };

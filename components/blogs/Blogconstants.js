@@ -60,4 +60,13 @@ export const initBlogForm = () => ({
     tags: [],
     readTime: "",
     schemaStructuredData: "",
+    seo: {
+        metaTitle: "",
+        metaDescription: "",
+        canonicalUrl: "",
+        ogTitle: "",
+        ogDescription: "",
+        ogImageFile: null,
+        ogImageUrl: "",
+    },
 });

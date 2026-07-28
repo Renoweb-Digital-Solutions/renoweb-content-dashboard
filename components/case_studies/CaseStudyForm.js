@@ -1,5 +1,7 @@
 "use client";
 
+import { useRef } from "react";
+
 // components/cms/CaseStudyForm.js
 import { CATEGORIES, slugify } from "../constants";
 import AuthorSelector from "./AuthorSelector";
@@ -21,6 +23,27 @@ export default function CaseStudyForm({
 }) {
     // generic top-level setter
     const set = (key, val) => setForm((f) => ({ ...f, [key]: val }));
+    const setSeo = (key, val) => setForm((f) => ({ ...f, seo: { ...f.seo, [key]: val } }));
+
+    const ogFileInputRef = useRef(null);
+    const handleOgImageChange = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            setSeo("ogImageFile", file);
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                setSeo("ogImageUrl", event.target.result);
+            };
+            reader.readAsDataURL(file);
+        }
+    };
+    const handleRemoveOgImage = () => {
+        setSeo("ogImageFile", null);
+        setSeo("ogImageUrl", "");
+        if (ogFileInputRef.current) {
+            ogFileInputRef.current.value = "";
+        }
+    };
 
     // auto-generate slug + link from title on blur
     const handleTitleBlur = () => {
@@ -225,6 +248,109 @@ export default function CaseStudyForm({
                     onPrimaryChange={(a) => set("author", a)}
                     onCoAuthorChange={(a) => set("coAuthor", a)}
                 />
+            </Section>
+
+            {/* ── SEO SETTINGS ────────────────────────────────────────────────── */}
+            <Section title="SEO Settings">
+                <Field
+                    label="Meta Title"
+                    value={form.seo?.metaTitle || ""}
+                    onChange={(v) => setSeo("metaTitle", v)}
+                    placeholder="e.g. Renoweb Case Study: Lead Gen..."
+                />
+                
+                <div>
+                    <div className={`text-right text-xs mt-1 ${(form.seo?.metaDescription?.length || 0) >= 150 ? ((form.seo?.metaDescription?.length || 0) === 160 ? 'text-red-400' : 'text-orange-400') : 'text-gray-600'}`}
+                         style={{ float: 'right', marginTop: 0 }}>
+                        {(form.seo?.metaDescription?.length || 0)}/160
+                    </div>
+                    <Field
+                        label="Meta Description"
+                        textarea
+                        rows={2}
+                        value={form.seo?.metaDescription || ""}
+                        onChange={(v) => {
+                            if (v.length <= 160) setSeo("metaDescription", v);
+                        }}
+                        placeholder="Short description for search engines..."
+                    />
+                </div>
+
+                <Field
+                    label="Canonical URL"
+                    value={form.seo?.canonicalUrl || ""}
+                    onChange={(v) => setSeo("canonicalUrl", v)}
+                    placeholder="https://renoweb.com/case-studies/..."
+                    mono
+                />
+
+                <div className="pt-4 mt-2 border-t border-gray-800">
+                    <Field
+                        label="Open Graph Title"
+                        value={form.seo?.ogTitle || ""}
+                        onChange={(v) => setSeo("ogTitle", v)}
+                        placeholder="Title for social sharing..."
+                    />
+                    
+                    <Field
+                        label="Open Graph Description"
+                        textarea
+                        rows={2}
+                        value={form.seo?.ogDescription || ""}
+                        onChange={(v) => setSeo("ogDescription", v)}
+                        placeholder="Description for social sharing..."
+                    />
+                    
+                    <div className="mt-4">
+                        <label className="block text-xs text-gray-400 mb-1.5 font-medium">Open Graph Image</label>
+                        <div className="border-2 border-dashed border-gray-700/50 rounded-xl p-6 flex flex-col items-center justify-center text-center bg-gray-900/20 transition-all hover:border-blue-500/50 hover:bg-gray-900/40 group relative overflow-hidden min-h-[160px]">
+                            {form.seo?.ogImageUrl ? (
+                                <>
+                                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                                    <img
+                                        src={form.seo.ogImageUrl}
+                                        alt="OG Preview"
+                                        className="w-full h-full object-contain absolute inset-0 z-0 p-2"
+                                    />
+                                    <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity z-10 flex items-center justify-center gap-3">
+                                        <label className="bg-blue-600/20 text-blue-400 border border-blue-500/30 px-4 py-2 rounded-lg text-xs font-semibold hover:bg-blue-600/30 transition backdrop-blur-md cursor-pointer">
+                                            Replace
+                                            <input
+                                                type="file"
+                                                accept="image/*"
+                                                onChange={handleOgImageChange}
+                                                className="hidden"
+                                            />
+                                        </label>
+                                        <button
+                                            onClick={handleRemoveOgImage}
+                                            className="bg-red-500/20 text-red-400 border border-red-500/30 px-4 py-2 rounded-lg text-xs font-semibold hover:bg-red-500/30 transition backdrop-blur-md"
+                                        >
+                                            Remove
+                                        </button>
+                                    </div>
+                                </>
+                            ) : (
+                                <>
+                                    <div className="w-10 h-10 rounded-full bg-gray-800/50 flex items-center justify-center mb-3 text-gray-500 group-hover:text-blue-400 group-hover:bg-blue-500/10 transition">
+                                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                        </svg>
+                                    </div>
+                                    <p className="text-sm text-gray-400 font-medium mb-1">Drop OG image here</p>
+                                    <p className="text-xs text-gray-600">Recommended 1200×630 for social media</p>
+                                    <input
+                                        type="file"
+                                        ref={ogFileInputRef}
+                                        accept="image/*"
+                                        onChange={handleOgImageChange}
+                                        className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-20"
+                                    />
+                                </>
+                            )}
+                        </div>
+                    </div>
+                </div>
             </Section>
         </div>
     );

@@ -69,4 +69,13 @@ export const initRHForm = () => ({
     pageCount: "",
     downloadable: false,
     featured: false,
+    seo: {
+        metaTitle: "",
+        metaDescription: "",
+        canonicalUrl: "",
+        ogTitle: "",
+        ogDescription: "",
+        ogImageFile: null,
+        ogImageUrl: "",
+    },
 });
