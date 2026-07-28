@@ -269,6 +269,8 @@ export default function PressForm({ form, setForm, onReset }) {
                 <p className="text-[10px] text-gray-600 mt-2">
                     Optional publisher logo (e.g., Forbes, Economic Times)
                 </p>
+            </Section>
+
             {/* ── SEO SETTINGS ────────────────────────────────────────────────── */}
             <Section title="SEO Settings">
                 <Field
