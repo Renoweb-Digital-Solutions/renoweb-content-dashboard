@@ -58,6 +58,16 @@ const NAV_ITEMS = [
         ),
     },
     {
+        label: "Projects",
+        href: "/cms/projects",
+        icon: (
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
+                    d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
+            </svg>
+        ),
+    },
+    {
         label: "Press & Media",
         href: "/cms/press",
         icon: (
@@ -69,25 +79,55 @@ const NAV_ITEMS = [
     },
 ];
 
-// ── Nav link ─────────────────────────────────────────
-function NavLink({ item, active }) {
+// ── Section Switcher (Desktop) ───────────────────────
+function SectionSwitcher({ items, pathname }) {
+    const [open, setOpen] = useState(false);
+    
+    const activeItem = items.find(item => item.href !== "/cms/dashboard" && (pathname === item.href || pathname.startsWith(item.href + "/"))) || items.find(i => i.href === "/cms/dashboard");
+    
+    if (!activeItem) return null;
+
     return (
-        <Link
-            href={item.href}
-            className={`relative flex items-center gap-2 px-3.5 py-2 text-[13px] font-medium rounded-lg transition-all duration-200 ${
-                active
-                    ? "text-white bg-white/[0.08]"
-                    : "text-gray-500 hover:text-gray-300 hover:bg-white/[0.04]"
-            }`}
-        >
-            <span className={active ? "text-blue-400" : "text-gray-600 group-hover:text-gray-400"}>
-                {item.icon}
-            </span>
-            <span className="hidden lg:inline">{item.label}</span>
-            {active && (
-                <span className="absolute -bottom-[13px] left-3 right-3 h-[2px] bg-blue-500 rounded-full" />
+        <div className="relative hidden lg:block">
+            <button
+                onClick={() => setOpen(!open)}
+                className="flex items-center gap-2.5 px-3.5 py-2 rounded-lg text-sm font-medium text-white bg-white/[0.06] hover:bg-white/[0.1] transition-all border border-white/[0.05]"
+            >
+                <span className="text-blue-400">{activeItem.icon}</span>
+                {activeItem.label}
+                <svg className={`w-3.5 h-3.5 text-gray-400 transition-transform ${open ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+            </button>
+            
+            {open && (
+                <>
+                    <div className="fixed inset-0 z-40" onClick={() => setOpen(false)} />
+                    <div className="absolute left-0 top-full mt-2 w-56 z-50 rounded-xl border border-gray-800 bg-gray-900/95 backdrop-blur-xl shadow-2xl overflow-hidden py-2">
+                        {items.map((item) => {
+                            const isActive = item.href === activeItem.href;
+                            return (
+                                <Link
+                                    key={item.href}
+                                    href={item.href}
+                                    onClick={() => setOpen(false)}
+                                    className={`flex items-center gap-3 px-4 py-2.5 text-[13px] font-medium transition-colors ${
+                                        isActive
+                                            ? "text-blue-400 bg-blue-500/[0.08]"
+                                            : "text-gray-400 hover:text-white hover:bg-white/[0.04]"
+                                    }`}
+                                >
+                                    <span className={isActive ? "text-blue-400" : "text-gray-500"}>
+                                        {item.icon}
+                                    </span>
+                                    {item.label}
+                                </Link>
+                            );
+                        })}
+                    </div>
+                </>
             )}
-        </Link>
+        </div>
     );
 }
 
@@ -283,14 +323,8 @@ export default function CMSNavbar() {
                     {/* Desktop divider */}
                     {pathname !== "/cms/dashboard" && <div className="hidden lg:block w-px h-6 bg-gray-800 mx-2" />}
 
-                    {/* Desktop nav */}
-                    {pathname !== "/cms/dashboard" && (
-                        <nav className="hidden lg:flex items-center gap-0.5">
-                            {NAV_ITEMS.map((item) => (
-                                <NavLink key={item.href} item={item} active={isActive(item.href)} />
-                            ))}
-                        </nav>
-                    )}
+                    {/* Desktop nav (Switcher) */}
+                    {pathname !== "/cms/dashboard" && <SectionSwitcher items={NAV_ITEMS} pathname={pathname} />}
                 </div>
 
                 {/* Right — Status + User */}

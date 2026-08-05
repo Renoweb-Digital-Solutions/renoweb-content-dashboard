@@ -43,21 +43,23 @@ export default function LoginPage() {
 
       if (res.ok) {
         // Success: The browser now holds a secure cookie. Redirect to CMS.
-        router.push('/cms/dashboard');
+        // Use window.location.href for a hard navigation to ensure cookies are 
+        // sent correctly to all Server Components and router cache is bypassed.
+        window.location.href = '/cms/dashboard';
       } else {
         const data = await res.json();
         setError(data.error || 'Failed to create session');
+        setLoading(false);
       }
     } catch (err) {
-      console.error('Login Error:', err);
       if (err.code === 'auth/user-not-found' || err.code === 'auth/wrong-password' || err.code === 'auth/invalid-credential') {
         setError('Invalid email or password.');
       } else if (err.code === 'auth/too-many-requests') {
         setError('Too many failed attempts. Please try again later.');
       } else {
+        console.error('Login Error:', err);
         setError('An unexpected error occurred. Please try again.');
       }
-    } finally {
       setLoading(false);
     }
   };

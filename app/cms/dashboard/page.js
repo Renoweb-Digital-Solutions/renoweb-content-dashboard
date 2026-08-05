@@ -85,6 +85,26 @@ const SECTIONS = [
     status: "live",
   },
   {
+    id: "projects",
+    href: "/cms/projects",
+    label: "Projects",
+    tag: "PORTFOLIO",
+    description:
+      "Upload and manage company projects with a gallery, rich text descriptions, and SEO metadata to showcase your work.",
+    icon: (
+      <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
+          d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
+      </svg>
+    ),
+    stats: [
+      { label: "Gallery limits", value: "2-5 images" },
+      { label: "Storage", value: "Supabase" },
+    ],
+    accent: "blue",
+    status: "live",
+  },
+  {
     id: "press",
     href: "/cms/press",
     label: "Press & Media",
@@ -140,6 +160,15 @@ const QUICK_ACTIONS = [
     icon: (
       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4a4 4 0 100 8 4 4 0 000-8zm0 10c-4.418 0-8 1.79-8 4v2h16v-2c0-2.21-3.582-4-8-4z" />
+      </svg>
+    ),
+  },
+  {
+    label: "New Project",
+    href: "/cms/projects",
+    icon: (
+      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
       </svg>
     ),
   },
