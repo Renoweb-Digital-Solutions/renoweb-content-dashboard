@@ -3,9 +3,19 @@
 import { useMemo, useState, useEffect, useRef, createRef } from "react";
 
 import BlogRichTextEditor from "../blogs/Blogrichtexteditor";
-import { PROJECT_CATEGORIES, slugify } from "./ProjectsConstants";
+import { PROJECT_CATEGORIES, AUTHORS, slugify } from "./ProjectsConstants";
 import { subscribeToProjectEntries, deleteProject, saveProject } from "@/lib/projects";
 import { useNetwork } from "@/lib/networkContext";
+
+function AuthorAvatar({ name, small = false }) {
+    const initials = name.split(" ").map((part) => part[0]).join("").slice(0, 2).toUpperCase();
+
+    return (
+        <div className={`rounded-full bg-gradient-to-br from-blue-500/30 to-cyan-900/40 border-2 border-gray-800 flex items-center justify-center font-bold text-blue-300 flex-shrink-0 ${small ? "w-6 h-6 text-[9px]" : "w-8 h-8 text-xs"}`}>
+            {initials}
+        </div>
+    );
+}
 
 function DeleteConfirmModal({ entry, onCancel, onConfirm }) {
     return (
@@ -231,6 +241,25 @@ function UpdateModal({ entry, onClose, onSave, saving }) {
                         />
                     </div>
 
+                    <div>
+                        <label className="mb-2 block text-xs font-medium text-gray-400">Project Author</label>
+                        <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+                            {AUTHORS.map((author) => (
+                                <button
+                                    key={author.id}
+                                    onClick={() => updateField("author", author)}
+                                    className={`flex items-center gap-3 rounded-xl border p-3 text-left transition-all ${form.author?.id === author.id ? "border-blue-500/50 bg-blue-500/10" : "border-gray-800 bg-gray-900/50 hover:border-gray-700"}`}
+                                >
+                                    <AuthorAvatar name={author.name} small />
+                                    <div>
+                                        <p className="text-xs font-semibold text-white">{author.name}</p>
+                                        <p className="text-[10px] text-gray-500">{author.role.split(",")[0]}</p>
+                                    </div>
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+
                     <button
                         onClick={() => updateField("featured", !form.featured)}
                         className={`flex items-center gap-2.5 rounded-xl border px-4 py-2.5 text-sm font-medium transition-all ${form.featured ? "border-cyan-500/50 bg-cyan-500/10 text-cyan-300" : "border-gray-800 bg-gray-900/50 text-gray-500 hover:border-gray-700"}`}
@@ -312,7 +341,13 @@ function EntryCard({ entry, onDelete, onEdit }) {
                 <p className="mb-3 line-clamp-3 text-[11px] leading-relaxed text-gray-500">{entry.excerpt}</p>
 
                 <div className="flex items-center justify-between">
-                    <p className="text-[9px] text-gray-600">{entry.publishDate}</p>
+                    <div className="flex items-center gap-2">
+                        {entry.author && <AuthorAvatar name={entry.author.name} small />}
+                        <div>
+                            {entry.author && <p className="text-[10px] font-semibold text-gray-400">{entry.author.name.split(" ")[0]}</p>}
+                            <p className="text-[9px] text-gray-600">{entry.publishDate}</p>
+                        </div>
+                    </div>
                 </div>
 
                 <div className="mt-3 flex gap-2 border-t border-gray-800 pt-3">

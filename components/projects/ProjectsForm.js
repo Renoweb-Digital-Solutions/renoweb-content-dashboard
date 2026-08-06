@@ -2,8 +2,18 @@
 
 import { useRef, createRef } from "react";
 import { Field, Section } from "../FormPrimitives";
-import { PROJECT_CATEGORIES, slugify } from "./ProjectsConstants";
+import { PROJECT_CATEGORIES, AUTHORS, slugify } from "./ProjectsConstants";
 import BlogRichTextEditor from "../blogs/Blogrichtexteditor"; // Reusing the blog RTE
+
+function AuthorAvatar({ name, small = false }) {
+    const initials = name.split(" ").map((part) => part[0]).join("").slice(0, 2).toUpperCase();
+
+    return (
+        <div className={`rounded-full bg-gradient-to-br from-blue-500/30 to-cyan-900/40 border-2 border-gray-800 flex items-center justify-center font-bold text-blue-300 flex-shrink-0 ${small ? "w-6 h-6 text-[9px]" : "w-8 h-8 text-xs"}`}>
+            {initials}
+        </div>
+    );
+}
 
 export default function ProjectsForm({ form, setForm, onReset }) {
     const set = (key, val) => setForm((f) => ({ ...f, [key]: val }));
@@ -226,6 +236,25 @@ export default function ProjectsForm({ form, setForm, onReset }) {
                                 <span className={`text-sm font-semibold transition-colors ${form.featured ? 'text-blue-400' : 'text-gray-300 group-hover:text-gray-200'}`}>Featured</span>
                             </div>
                         </label>
+                    </div>
+                </div>
+
+                <div className="mb-4">
+                    <label className="mb-2 block text-xs font-medium text-gray-400">Project Author</label>
+                    <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+                        {AUTHORS.map((author) => (
+                            <button
+                                key={author.id}
+                                onClick={() => set("author", author)}
+                                className={`flex items-center gap-3 rounded-xl border p-3 text-left transition-all ${form.author?.id === author.id ? "border-blue-500/50 bg-blue-500/10" : "border-gray-800 bg-gray-900/50 hover:border-gray-700"}`}
+                            >
+                                <AuthorAvatar name={author.name} small />
+                                <div>
+                                    <p className="text-xs font-semibold text-white">{author.name}</p>
+                                    <p className="text-[10px] text-gray-500">{author.role.split(",")[0]}</p>
+                                </div>
+                            </button>
+                        ))}
                     </div>
                 </div>
 
