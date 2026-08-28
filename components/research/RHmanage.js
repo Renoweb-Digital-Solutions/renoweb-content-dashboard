@@ -12,6 +12,7 @@
 
 import { useState, useMemo, useEffect } from "react";
 import RHRichTextEditor from "./RHrichtexteditor";
+import RHForm from "./RHform";
 import { RH_CATEGORIES, RH_CONTENT_TYPES, AUTHORS, slugify } from "./RHconstants";
 import { subscribeToResearchEntries, deleteResearch, saveResearch } from "@/lib/research";
 import { useNetwork } from "@/lib/networkContext";
@@ -84,20 +85,6 @@ function UpdateModal({ entry, onClose, onSave, saving }) {
     });
     const set = (key, val) => setForm((f) => ({ ...f, [key]: val }));
 
-    const handleTitleBlur = () => {
-        if (form.title && form.slug === slugify(entry.title)) {
-            set("slug", slugify(form.title));
-        }
-    };
-
-    const [tagInput, setTagInput] = useState("");
-    const addTag = () => {
-        const t = tagInput.trim().toLowerCase();
-        if (t && !form.tags.includes(t)) set("tags", [...form.tags, t]);
-        setTagInput("");
-    };
-    const removeTag = (t) => set("tags", form.tags.filter((x) => x !== t));
-
     return (
         <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
             <div className="bg-black border border-gray-800 rounded-2xl w-full max-w-4xl shadow-2xl my-4">
@@ -123,176 +110,8 @@ function UpdateModal({ entry, onClose, onSave, saving }) {
                 </div>
 
                 {/* Scrollable body */}
-                <div className="p-6 space-y-5 max-h-[70vh] overflow-y-auto">
-
-                    {/* Category + Content Type */}
-                    <div className="grid grid-cols-2 gap-3">
-                        <div>
-                            <label className="block text-xs text-gray-400 mb-1.5 font-medium">Category</label>
-                            <select
-                                value={form.category}
-                                onChange={(e) => set("category", e.target.value)}
-                                className="w-full bg-gray-950 border border-gray-800 focus:border-amber-500/60 rounded-lg px-3 py-2.5 text-sm text-gray-200 outline-none transition appearance-none"
-                            >
-                                <option value="">Select…</option>
-                                {RH_CATEGORIES.map((c) => <option key={c} value={c}>{c}</option>)}
-                            </select>
-                        </div>
-                        <div>
-                            <label className="block text-xs text-gray-400 mb-1.5 font-medium">Content Type</label>
-                            <select
-                                value={form.contentType}
-                                onChange={(e) => set("contentType", e.target.value)}
-                                className="w-full bg-gray-950 border border-gray-800 focus:border-amber-500/60 rounded-lg px-3 py-2.5 text-sm text-gray-200 outline-none transition appearance-none"
-                            >
-                                <option value="">Select…</option>
-                                {RH_CONTENT_TYPES.map((t) => <option key={t.value} value={t.value}>{t.label}</option>)}
-                            </select>
-                        </div>
-                    </div>
-
-                    {/* Title */}
-                    <div onBlur={handleTitleBlur}>
-                        <label className="block text-xs text-gray-400 mb-1.5 font-medium">Title</label>
-                        <input
-                            value={form.title}
-                            onChange={(e) => set("title", e.target.value)}
-                            className="w-full bg-gray-950 border border-gray-800 focus:border-amber-500/60 rounded-lg px-4 py-2.5 text-sm text-gray-200 placeholder-gray-600 outline-none transition"
-                        />
-                    </div>
-
-                    {/* Slug */}
-                    <div>
-                        <label className="block text-xs text-gray-400 mb-1.5 font-medium">Slug / ID</label>
-                        <input
-                            value={form.slug}
-                            onChange={(e) => set("slug", e.target.value)}
-                            className="w-full bg-gray-950 border border-gray-800 focus:border-amber-500/60 rounded-lg px-4 py-2.5 text-sm text-gray-200 font-mono placeholder-gray-600 outline-none transition"
-                        />
-                    </div>
-
-                    {/* Abstract */}
-                    <div>
-                        <label className="block text-xs text-gray-400 mb-1.5 font-medium">Abstract</label>
-                        <textarea
-                            rows={3}
-                            value={form.abstract}
-                            onChange={(e) => set("abstract", e.target.value)}
-                            className="w-full bg-gray-950 border border-gray-800 focus:border-amber-500/60 rounded-lg px-4 py-2.5 text-sm text-gray-200 placeholder-gray-600 outline-none transition resize-none"
-                        />
-                    </div>
-
-                    <div>
-                        <label className="block text-xs text-gray-400 mb-1.5 font-medium">Main Content</label>
-                        <RHRichTextEditor
-                            value={form.content}
-                            onChange={(value) => set("content", value)}
-                            slug={form.slug || entry.slug}
-                        />
-                    </div>
-
-                    {/* Publish Date + Read Time + Page Count */}
-                    <div className="grid grid-cols-3 gap-3">
-                        <div>
-                            <label className="block text-xs text-gray-400 mb-1.5 font-medium">Publish Date</label>
-                            <input
-                                type="date"
-                                value={form.publishDate}
-                                onChange={(e) => set("publishDate", e.target.value)}
-                                className="w-full bg-gray-950 border border-gray-800 focus:border-amber-500/60 rounded-lg px-3 py-2.5 text-sm text-gray-200 outline-none transition"
-                            />
-                        </div>
-                        <div>
-                            <label className="block text-xs text-gray-400 mb-1.5 font-medium">Read Time</label>
-                            <input
-                                value={form.readTime}
-                                onChange={(e) => set("readTime", e.target.value)}
-                                placeholder="18 min read"
-                                className="w-full bg-gray-950 border border-gray-800 focus:border-amber-500/60 rounded-lg px-3 py-2.5 text-sm text-gray-200 placeholder-gray-600 outline-none transition"
-                            />
-                        </div>
-                        <div>
-                            <label className="block text-xs text-gray-400 mb-1.5 font-medium">Pages</label>
-                            <input
-                                value={form.pageCount}
-                                onChange={(e) => set("pageCount", e.target.value)}
-                                placeholder="42"
-                                className="w-full bg-gray-950 border border-gray-800 focus:border-amber-500/60 rounded-lg px-3 py-2.5 text-sm text-gray-200 placeholder-gray-600 outline-none transition"
-                            />
-                        </div>
-                    </div>
-
-                    {/* Tags */}
-                    <div>
-                        <label className="block text-xs text-gray-400 mb-1.5 font-medium">Tags</label>
-                        {form.tags.length > 0 && (
-                            <div className="flex flex-wrap gap-1.5 mb-2">
-                                {form.tags.map((t) => (
-                                    <span key={t} className="flex items-center gap-1.5 px-2.5 py-1 bg-amber-500/10 border border-amber-500/30 text-amber-400 rounded-full text-[11px] font-medium">
-                                        #{t}
-                                        <button onClick={() => removeTag(t)} className="text-amber-400/60 hover:text-red-400 transition">
-                                            <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12" />
-                                            </svg>
-                                        </button>
-                                    </span>
-                                ))}
-                            </div>
-                        )}
-                        <div className="flex gap-2">
-                            <input
-                                value={tagInput}
-                                onChange={(e) => setTagInput(e.target.value)}
-                                onKeyDown={(e) => { if (e.key === "Enter" || e.key === ",") { e.preventDefault(); addTag(); } }}
-                                placeholder="Add keyword…"
-                                className="flex-1 bg-gray-950 border border-gray-800 focus:border-amber-500/60 rounded-lg px-4 py-2.5 text-sm text-gray-200 placeholder-gray-600 outline-none transition"
-                            />
-                            <button onClick={addTag} className="px-3 py-2.5 rounded-lg bg-amber-500/10 border border-amber-500/30 text-amber-400 text-xs font-semibold hover:bg-amber-500/20 transition">Add</button>
-                        </div>
-                    </div>
-
-                    {/* Authors */}
-                    <div>
-                        <label className="block text-xs text-gray-400 mb-2 font-medium">Primary Author</label>
-                        <div className="grid grid-cols-2 gap-2">
-                            {AUTHORS.map((a) => (
-                                <button
-                                    key={a.id}
-                                    onClick={() => set("author", a)}
-                                    className={`flex items-center gap-3 p-3 rounded-xl border text-left transition-all ${form.author?.id === a.id ? "border-amber-500/50 bg-amber-500/10" : "border-gray-800 bg-gray-900/50 hover:border-gray-700"}`}
-                                >
-                                    <AuthorAvatar name={a.name} small />
-                                    <div>
-                                        <p className="text-xs font-semibold text-white">{a.name}</p>
-                                        <p className="text-[10px] text-gray-500">{a.role.split(",")[0]}</p>
-                                    </div>
-                                    {form.author?.id === a.id && <svg className="w-4 h-4 text-amber-400 ml-auto flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" /></svg>}
-                                </button>
-                            ))}
-                        </div>
-                    </div>
-
-                    {/* Toggles */}
-                    <div className="flex flex-wrap gap-3 pt-1">
-                        <button
-                            onClick={() => set("downloadable", !form.downloadable)}
-                            className={`flex items-center gap-2.5 px-4 py-2.5 rounded-xl border text-sm font-medium transition-all ${form.downloadable ? "border-amber-500/50 bg-amber-500/10 text-amber-400" : "border-gray-800 bg-gray-900/50 text-gray-500 hover:border-gray-700"}`}
-                        >
-                            <div className={`w-4 h-4 rounded flex items-center justify-center border ${form.downloadable ? "border-amber-500 bg-amber-500" : "border-gray-700"}`}>
-                                {form.downloadable && <svg className="w-2.5 h-2.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" /></svg>}
-                            </div>
-                            Downloadable PDF
-                        </button>
-                        <button
-                            onClick={() => set("featured", !form.featured)}
-                            className={`flex items-center gap-2.5 px-4 py-2.5 rounded-xl border text-sm font-medium transition-all ${form.featured ? "border-yellow-500/50 bg-yellow-500/10 text-yellow-400" : "border-gray-800 bg-gray-900/50 text-gray-500 hover:border-gray-700"}`}
-                        >
-                            <div className={`w-4 h-4 rounded flex items-center justify-center border ${form.featured ? "border-yellow-500 bg-yellow-500" : "border-gray-700"}`}>
-                                {form.featured && <svg className="w-2.5 h-2.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" /></svg>}
-                            </div>
-                            ★ Featured
-                        </button>
-                    </div>
+                <div className="p-6 max-h-[70vh] overflow-y-auto">
+                    <RHForm form={form} setForm={setForm} showHeader={false} />
                 </div>
 
                 {/* Footer */}

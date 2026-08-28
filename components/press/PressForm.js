@@ -8,7 +8,7 @@ import { Field, Section } from "../FormPrimitives";
 // Matches BlogForm layout: full-width sections, no card wrapper.
 // ─────────────────────────────────────────────────────────────────────────────
 
-export default function PressForm({ form, setForm, onReset }) {
+export default function PressForm({ form, setForm, onReset, showHeader = true }) {
     const fileInputRef = useRef(null);
 
     const set = (key, val) => setForm((f) => ({ ...f, [key]: val }));
@@ -82,22 +82,24 @@ export default function PressForm({ form, setForm, onReset }) {
     return (
         <div>
             {/* ── Header ─────────────────────────────────────────────────────── */}
-            <div className="flex items-center justify-between mb-8">
-                <div>
-                    <h1 className="text-xl font-bold text-white">
-                        {form.id ? "Edit Press Entry" : "New Press Entry"}
-                    </h1>
-                    <p className="text-xs text-gray-500 mt-0.5">
-                        Add a new press feature or media link to the directory.
-                    </p>
+            {showHeader && (
+                <div className="flex items-center justify-between mb-8">
+                    <div>
+                        <h1 className="text-xl font-bold text-white">
+                            {form.id ? "Edit Press Entry" : "New Press Entry"}
+                        </h1>
+                        <p className="text-xs text-gray-500 mt-0.5">
+                            Add a new press feature or media link to the directory.
+                        </p>
+                    </div>
+                    <button
+                        onClick={onReset}
+                        className="text-xs text-gray-600 hover:text-gray-300 transition px-3 py-1.5 rounded-lg border border-gray-800 hover:border-gray-700"
+                    >
+                        Reset all
+                    </button>
                 </div>
-                <button
-                    onClick={onReset}
-                    className="text-xs text-gray-600 hover:text-gray-300 transition px-3 py-1.5 rounded-lg border border-gray-800 hover:border-gray-700"
-                >
-                    Reset all
-                </button>
-            </div>
+            )}
 
             {/* ── DETAILS ────────────────────────────────────────────────────── */}
             <Section title="Details">

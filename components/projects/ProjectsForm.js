@@ -15,7 +15,7 @@ function AuthorAvatar({ name, small = false }) {
     );
 }
 
-export default function ProjectsForm({ form, setForm, onReset }) {
+export default function ProjectsForm({ form, setForm, onReset, showHeader = true }) {
     const set = (key, val) => setForm((f) => ({ ...f, [key]: val }));
     const setSeo = (key, val) => setForm((f) => ({ ...f, seo: { ...f.seo, [key]: val } }));
 
@@ -86,22 +86,24 @@ export default function ProjectsForm({ form, setForm, onReset }) {
     return (
         <div>
             {/* ── Header ─────────────────────────────────────────────────────── */}
-            <div className="flex items-center justify-between mb-8">
-                <div>
-                    <h1 className="text-xl font-bold text-white">
-                        {form.id ? "Edit Project" : "New Project"}
-                    </h1>
-                    <p className="text-xs text-gray-500 mt-0.5">
-                        Add a new project to the company portfolio.
-                    </p>
+            {showHeader && (
+                <div className="flex items-center justify-between mb-8">
+                    <div>
+                        <h1 className="text-xl font-bold text-white">
+                            {form.id ? "Edit Project" : "New Project"}
+                        </h1>
+                        <p className="text-xs text-gray-500 mt-0.5">
+                            Add a new project to the company portfolio.
+                        </p>
+                    </div>
+                    <button
+                        onClick={onReset}
+                        className="text-xs text-gray-600 hover:text-gray-300 transition px-3 py-1.5 rounded-lg border border-gray-800 hover:border-gray-700"
+                    >
+                        Reset all
+                    </button>
                 </div>
-                <button
-                    onClick={onReset}
-                    className="text-xs text-gray-600 hover:text-gray-300 transition px-3 py-1.5 rounded-lg border border-gray-800 hover:border-gray-700"
-                >
-                    Reset all
-                </button>
-            </div>
+            )}
 
             {/* ── BASICS ─────────────────────────────────────────────────────── */}
             <Section title="Basics">

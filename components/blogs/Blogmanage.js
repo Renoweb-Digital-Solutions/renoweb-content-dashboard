@@ -3,6 +3,7 @@
 import { useMemo, useState, useEffect } from "react";
 
 import BlogRichTextEditor from "./Blogrichtexteditor";
+import BlogForm from "./Blogform";
 import { AUTHORS, BLOG_CATEGORIES, slugify } from "./Blogconstants";
 import { subscribeToBlogEntries, deleteBlog, saveBlog } from "@/lib/blogs";
 import { useNetwork } from "@/lib/networkContext";
@@ -57,28 +58,7 @@ function UpdateModal({ entry, onClose, onSave, saving }) {
         content: entry.content || "",
         tags: [...(entry.tags || [])],
     });
-    const [tagInput, setTagInput] = useState("");
 
-    const updateField = (key, value) => setForm((current) => ({ ...current, [key]: value }));
-
-    const handleTitleBlur = () => {
-        if (form.title && form.slug === slugify(entry.title)) {
-            updateField("slug", slugify(form.title));
-        }
-    };
-
-    const addTag = () => {
-        const tag = tagInput.trim().toLowerCase();
-        if (!tag || form.tags.includes(tag)) {
-            setTagInput("");
-            return;
-        }
-
-        updateField("tags", [...form.tags, tag]);
-        setTagInput("");
-    };
-
-    const removeTag = (tag) => updateField("tags", form.tags.filter((item) => item !== tag));
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-black/80 p-4 backdrop-blur-sm">
@@ -103,147 +83,8 @@ function UpdateModal({ entry, onClose, onSave, saving }) {
                     </button>
                 </div>
 
-                <div className="max-h-[70vh] space-y-5 overflow-y-auto p-6">
-                    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                        <div>
-                            <label className="mb-1.5 block text-xs font-medium text-gray-400">Category</label>
-                            <select
-                                value={form.category}
-                                onChange={(event) => updateField("category", event.target.value)}
-                                className="w-full appearance-none rounded-lg border border-gray-800 bg-gray-950 px-3 py-2.5 text-sm text-gray-200 outline-none transition focus:border-blue-500/60"
-                            >
-                                <option value="">Select...</option>
-                                {BLOG_CATEGORIES.map((category) => (
-                                    <option key={category} value={category}>{category}</option>
-                                ))}
-                            </select>
-                        </div>
-
-                        <div>
-                            <label className="mb-1.5 block text-xs font-medium text-gray-400">Publish Date</label>
-                            <input
-                                type="date"
-                                value={form.publishDate}
-                                onChange={(event) => updateField("publishDate", event.target.value)}
-                                className="w-full rounded-lg border border-gray-800 bg-gray-950 px-3 py-2.5 text-sm text-gray-200 outline-none transition focus:border-blue-500/60"
-                            />
-                        </div>
-                    </div>
-
-                    <div onBlur={handleTitleBlur}>
-                        <label className="mb-1.5 block text-xs font-medium text-gray-400">Title</label>
-                        <input
-                            value={form.title}
-                            onChange={(event) => updateField("title", event.target.value)}
-                            className="w-full rounded-lg border border-gray-800 bg-gray-950 px-4 py-2.5 text-sm text-gray-200 outline-none transition focus:border-blue-500/60"
-                        />
-                    </div>
-
-                    <div>
-                        <label className="mb-1.5 block text-xs font-medium text-gray-400">Slug</label>
-                        <input
-                            value={form.slug}
-                            onChange={(event) => updateField("slug", event.target.value)}
-                            className="w-full rounded-lg border border-gray-800 bg-gray-950 px-4 py-2.5 font-mono text-sm text-gray-200 outline-none transition focus:border-blue-500/60"
-                        />
-                    </div>
-
-                    <div>
-                        <label className="mb-1.5 block text-xs font-medium text-gray-400">Short description</label>
-                        <textarea
-                            rows={4}
-                            value={form.excerpt}
-                            onChange={(event) => updateField("excerpt", event.target.value)}
-                            className="w-full resize-none rounded-lg border border-gray-800 bg-gray-950 px-4 py-2.5 text-sm text-gray-200 outline-none transition focus:border-blue-500/60"
-                        />
-                    </div>
-
-                    <div>
-                        <label className="mb-1.5 block text-xs font-medium text-gray-400">Main Content</label>
-                        <BlogRichTextEditor
-                            value={form.content}
-                            onChange={(value) => updateField("content", value)}
-                            slug={form.slug || entry.slug}
-                        />
-                    </div>
-
-                    <div>
-                        <label className="mb-1.5 block text-xs font-medium text-gray-400">Read Time</label>
-                        <input
-                            value={form.readTime}
-                            onChange={(event) => updateField("readTime", event.target.value)}
-                            className="w-full rounded-lg border border-gray-800 bg-gray-950 px-4 py-2.5 text-sm text-gray-200 outline-none transition focus:border-blue-500/60"
-                        />
-                    </div>
-
-                    <div>
-                        <label className="mb-2 block text-xs font-medium text-gray-400">Primary Author</label>
-                        <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
-                            {AUTHORS.map((author) => (
-                                <button
-                                    key={author.id}
-                                    onClick={() => updateField("author", author)}
-                                    className={`flex items-center gap-3 rounded-xl border p-3 text-left transition-all ${form.author?.id === author.id ? "border-blue-500/50 bg-blue-500/10" : "border-gray-800 bg-gray-900/50 hover:border-gray-700"}`}
-                                >
-                                    <AuthorAvatar name={author.name} small />
-                                    <div>
-                                        <p className="text-xs font-semibold text-white">{author.name}</p>
-                                        <p className="text-[10px] text-gray-500">{author.role.split(",")[0]}</p>
-                                    </div>
-                                </button>
-                            ))}
-                        </div>
-                    </div>
-
-                    <div>
-                        <label className="mb-1.5 block text-xs font-medium text-gray-400">Tags</label>
-                        {form.tags.length > 0 && (
-                            <div className="mb-2 flex flex-wrap gap-1.5">
-                                {form.tags.map((tag) => (
-                                    <span key={tag} className="flex items-center gap-1.5 rounded-full border border-blue-500/30 bg-blue-500/10 px-2.5 py-1 text-[11px] font-medium text-blue-400">
-                                        #{tag}
-                                        <button onClick={() => removeTag(tag)} className="text-blue-400/70 transition hover:text-red-400">
-                                            <svg className="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12" />
-                                            </svg>
-                                        </button>
-                                    </span>
-                                ))}
-                            </div>
-                        )}
-
-                        <div className="flex gap-2">
-                            <input
-                                value={tagInput}
-                                onChange={(event) => setTagInput(event.target.value)}
-                                onKeyDown={(event) => {
-                                    if (event.key === "Enter" || event.key === ",") {
-                                        event.preventDefault();
-                                        addTag();
-                                    }
-                                }}
-                                placeholder="Add tag..."
-                                className="flex-1 rounded-lg border border-gray-800 bg-gray-950 px-4 py-2.5 text-sm text-gray-200 outline-none transition focus:border-blue-500/60"
-                            />
-                            <button onClick={addTag} className="rounded-lg border border-blue-500/30 bg-blue-500/10 px-3 py-2.5 text-xs font-semibold text-blue-400 transition hover:bg-blue-500/20">
-                                Add
-                            </button>
-                        </div>
-                    </div>
-
-                    <button
-                        onClick={() => updateField("featured", !form.featured)}
-                        className={`flex items-center gap-2.5 rounded-xl border px-4 py-2.5 text-sm font-medium transition-all ${form.featured ? "border-cyan-500/50 bg-cyan-500/10 text-cyan-300" : "border-gray-800 bg-gray-900/50 text-gray-500 hover:border-gray-700"}`}
-                    >
-                        <div className={`flex h-4 w-4 items-center justify-center rounded border ${form.featured ? "border-cyan-400 bg-cyan-400" : "border-gray-700"}`}>
-                            {form.featured && (
-                                <svg className="h-2.5 w-2.5 text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
-                                </svg>
-                            )}
-                        </div>
-                        Featured Post
-                    </button>
+                <div className="max-h-[70vh] overflow-y-auto px-6 py-6">
+                    <BlogForm form={form} setForm={setForm} showHeader={false} />
                 </div>
 
                 <div className="flex justify-end gap-3 border-t border-gray-800 px-6 py-4">

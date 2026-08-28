@@ -17,7 +17,7 @@ import { RH_CATEGORIES, RH_CONTENT_TYPES, slugify } from "./RHconstants";
 import RHRichTextEditor from "./RHrichtexteditor";
 import RHTagsInput from "./RHtagsinput";
 
-export default function RHForm({ form, setForm, onReset }) {
+export default function RHForm({ form, setForm, onReset, showHeader = true }) {
     const set = (key, val) => setForm((f) => ({ ...f, [key]: val }));
     const setSeo = (key, val) => setForm((f) => ({ ...f, seo: { ...f.seo, [key]: val } }));
 
@@ -48,20 +48,22 @@ export default function RHForm({ form, setForm, onReset }) {
     return (
         <div>
             {/* ── Header ─────────────────────────────────────────────────────── */}
-            <div className="flex items-center justify-between mb-8">
-                <div>
-                    <h1 className="text-xl font-bold text-white">New Research Hub Entry</h1>
-                    <p className="text-xs text-gray-500 mt-0.5">
-                        Publish a research report, whitepaper, or dataset. JSON preview generated automatically.
-                    </p>
+            {showHeader && (
+                <div className="flex items-center justify-between mb-8">
+                    <div>
+                        <h1 className="text-xl font-bold text-white">New Research Hub Entry</h1>
+                        <p className="text-xs text-gray-500 mt-0.5">
+                            Publish a research report, whitepaper, or dataset. JSON preview generated automatically.
+                        </p>
+                    </div>
+                    <button
+                        onClick={onReset}
+                        className="text-xs text-gray-600 hover:text-gray-300 transition px-3 py-1.5 rounded-lg border border-gray-800 hover:border-gray-700"
+                    >
+                        Reset all
+                    </button>
                 </div>
-                <button
-                    onClick={onReset}
-                    className="text-xs text-gray-600 hover:text-gray-300 transition px-3 py-1.5 rounded-lg border border-gray-800 hover:border-gray-700"
-                >
-                    Reset all
-                </button>
-            </div>
+            )}
 
             {/* ── BASICS ─────────────────────────────────────────────────────── */}
             <Section title="Basics">

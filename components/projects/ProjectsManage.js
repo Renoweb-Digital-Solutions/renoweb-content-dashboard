@@ -3,6 +3,7 @@
 import { useMemo, useState, useEffect, useRef, createRef } from "react";
 
 import BlogRichTextEditor from "../blogs/Blogrichtexteditor";
+import ProjectsForm from "./ProjectsForm";
 import { PROJECT_CATEGORIES, AUTHORS, slugify } from "./ProjectsConstants";
 import { subscribeToProjectEntries, deleteProject, saveProject } from "@/lib/projects";
 import { useNetwork } from "@/lib/networkContext";
@@ -58,49 +59,6 @@ function UpdateModal({ entry, onClose, onSave, saving }) {
 
     const updateField = (key, value) => setForm((current) => ({ ...current, [key]: value }));
 
-    const handleTitleBlur = () => {
-        if (form.title && form.slug === slugify(entry.title)) {
-            updateField("slug", slugify(form.title));
-        }
-    };
-
-    const imageInputRefs = useRef([...Array(5)].map(() => createRef()));
-
-    const handleImageChange = (index, e) => {
-        const file = e.target.files[0];
-        if (file) {
-            const newImageFiles = [...form.imageFiles];
-            newImageFiles[index] = file;
-            updateField("imageFiles", newImageFiles);
-
-            const reader = new FileReader();
-            reader.onload = (event) => {
-                const newImagePreviews = [...form.imagePreviews];
-                newImagePreviews[index] = event.target.result;
-                updateField("imagePreviews", newImagePreviews);
-            };
-            reader.readAsDataURL(file);
-        }
-    };
-
-    const handleRemoveImage = (index) => {
-        const newImageFiles = [...form.imageFiles];
-        newImageFiles[index] = null;
-        updateField("imageFiles", newImageFiles);
-
-        const newImagePreviews = [...form.imagePreviews];
-        newImagePreviews[index] = null;
-        updateField("imagePreviews", newImagePreviews);
-
-        const newImages = [...form.images];
-        newImages[index] = null;
-        updateField("images", newImages);
-
-        if (imageInputRefs.current[index]?.current) {
-            imageInputRefs.current[index].current.value = "";
-        }
-    };
-
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-black/80 p-4 backdrop-blur-sm">
             <div className="my-4 w-full max-w-4xl rounded-2xl border border-gray-800 bg-black shadow-2xl">
@@ -124,155 +82,8 @@ function UpdateModal({ entry, onClose, onSave, saving }) {
                     </button>
                 </div>
 
-                <div className="max-h-[70vh] space-y-5 overflow-y-auto p-6 custom-scrollbar">
-                    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                        <div>
-                            <label className="mb-1.5 block text-xs font-medium text-gray-400">Category</label>
-                            <select
-                                value={form.category}
-                                onChange={(event) => updateField("category", event.target.value)}
-                                className="w-full appearance-none rounded-lg border border-gray-800 bg-gray-950 px-3 py-2.5 text-sm text-gray-200 outline-none transition focus:border-blue-500/60"
-                            >
-                                <option value="">Select...</option>
-                                {PROJECT_CATEGORIES.map((category) => (
-                                    <option key={category} value={category}>{category}</option>
-                                ))}
-                            </select>
-                        </div>
-
-                        <div>
-                            <label className="mb-1.5 block text-xs font-medium text-gray-400">Publish Date</label>
-                            <input
-                                type="date"
-                                value={form.publishDate}
-                                onChange={(event) => updateField("publishDate", event.target.value)}
-                                className="w-full rounded-lg border border-gray-800 bg-gray-950 px-3 py-2.5 text-sm text-gray-200 outline-none transition focus:border-blue-500/60"
-                            />
-                        </div>
-                    </div>
-
-                    <div onBlur={handleTitleBlur}>
-                        <label className="mb-1.5 block text-xs font-medium text-gray-400">Title</label>
-                        <input
-                            value={form.title}
-                            onChange={(event) => updateField("title", event.target.value)}
-                            className="w-full rounded-lg border border-gray-800 bg-gray-950 px-4 py-2.5 text-sm text-gray-200 outline-none transition focus:border-blue-500/60"
-                        />
-                    </div>
-
-                    <div>
-                        <label className="mb-1.5 block text-xs font-medium text-gray-400">Slug</label>
-                        <input
-                            value={form.slug}
-                            onChange={(event) => updateField("slug", event.target.value)}
-                            className="w-full rounded-lg border border-gray-800 bg-gray-950 px-4 py-2.5 font-mono text-sm text-gray-200 outline-none transition focus:border-blue-500/60"
-                        />
-                    </div>
-
-                    <div>
-                        <label className="mb-1.5 block text-xs font-medium text-gray-400">Excerpt</label>
-                        <textarea
-                            rows={4}
-                            value={form.excerpt}
-                            onChange={(event) => updateField("excerpt", event.target.value)}
-                            className="w-full resize-none rounded-lg border border-gray-800 bg-gray-950 px-4 py-2.5 text-sm text-gray-200 outline-none transition focus:border-blue-500/60"
-                        />
-                    </div>
-
-                    <div>
-                        <label className="mb-1.5 block text-xs font-medium text-gray-400">Gallery Images</label>
-                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                            {[0, 1, 2, 3, 4].map((index) => (
-                                <div key={index} className="border border-gray-800 rounded-xl p-3 flex flex-col items-center justify-center text-center bg-gray-900/50 relative overflow-hidden min-h-[120px]">
-                                    {form.imagePreviews[index] ? (
-                                        <>
-                                            {/* eslint-disable-next-line @next/next/no-img-element */}
-                                            <img
-                                                src={form.imagePreviews[index]}
-                                                alt={`Preview ${index + 1}`}
-                                                className="w-full h-full object-contain absolute inset-0 z-0 p-1"
-                                            />
-                                            <div className="absolute inset-0 bg-black/70 flex flex-col items-center justify-center gap-2 opacity-0 hover:opacity-100 transition-opacity z-10">
-                                                <label className="bg-blue-600/20 text-blue-400 border border-blue-500/30 px-2 py-1 rounded text-[10px] font-semibold cursor-pointer">
-                                                    Replace
-                                                    <input
-                                                        type="file"
-                                                        accept="image/*"
-                                                        onChange={(e) => handleImageChange(index, e)}
-                                                        className="hidden"
-                                                    />
-                                                </label>
-                                                <button
-                                                    onClick={() => handleRemoveImage(index)}
-                                                    className="bg-red-500/20 text-red-400 border border-red-500/30 px-2 py-1 rounded text-[10px] font-semibold"
-                                                >
-                                                    Remove
-                                                </button>
-                                            </div>
-                                        </>
-                                    ) : (
-                                        <>
-                                            <div className="w-8 h-8 rounded-full bg-gray-800 flex items-center justify-center mb-1 text-gray-500">
-                                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                                                </svg>
-                                            </div>
-                                            <p className="text-[10px] text-gray-500">Image {index + 1}</p>
-                                            <input
-                                                type="file"
-                                                ref={imageInputRefs.current[index]}
-                                                accept="image/*"
-                                                onChange={(e) => handleImageChange(index, e)}
-                                                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-20"
-                                            />
-                                        </>
-                                    )}
-                                </div>
-                            ))}
-                        </div>
-                    </div>
-
-                    <div>
-                        <label className="mb-1.5 block text-xs font-medium text-gray-400">Description (RTE)</label>
-                        <BlogRichTextEditor
-                            value={form.content}
-                            onChange={(value) => updateField("content", value)}
-                            slug={form.slug || entry.slug}
-                        />
-                    </div>
-
-                    <div>
-                        <label className="mb-2 block text-xs font-medium text-gray-400">Project Author</label>
-                        <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
-                            {AUTHORS.map((author) => (
-                                <button
-                                    key={author.id}
-                                    onClick={() => updateField("author", author)}
-                                    className={`flex items-center gap-3 rounded-xl border p-3 text-left transition-all ${form.author?.id === author.id ? "border-blue-500/50 bg-blue-500/10" : "border-gray-800 bg-gray-900/50 hover:border-gray-700"}`}
-                                >
-                                    <AuthorAvatar name={author.name} small />
-                                    <div>
-                                        <p className="text-xs font-semibold text-white">{author.name}</p>
-                                        <p className="text-[10px] text-gray-500">{author.role.split(",")[0]}</p>
-                                    </div>
-                                </button>
-                            ))}
-                        </div>
-                    </div>
-
-                    <button
-                        onClick={() => updateField("featured", !form.featured)}
-                        className={`flex items-center gap-2.5 rounded-xl border px-4 py-2.5 text-sm font-medium transition-all ${form.featured ? "border-cyan-500/50 bg-cyan-500/10 text-cyan-300" : "border-gray-800 bg-gray-900/50 text-gray-500 hover:border-gray-700"}`}
-                    >
-                        <div className={`flex h-4 w-4 items-center justify-center rounded border ${form.featured ? "border-cyan-400 bg-cyan-400" : "border-gray-700"}`}>
-                            {form.featured && (
-                                <svg className="h-2.5 w-2.5 text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
-                                </svg>
-                            )}
-                        </div>
-                        Featured Project
-                    </button>
+                <div className="max-h-[70vh] overflow-y-auto px-6 py-6 custom-scrollbar">
+                    <ProjectsForm form={form} setForm={setForm} showHeader={false} />
                 </div>
 
                 <div className="flex justify-end gap-3 border-t border-gray-800 px-6 py-4">
