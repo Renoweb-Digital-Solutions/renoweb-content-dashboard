@@ -252,7 +252,7 @@ export default function AuthorForm({ initialAuthor = null, onSubmit, onClose, su
                         )}
                     </div>
                     <p style={{ fontSize: 10, color: "#4b5563", lineHeight: 1.4 }}>
-                        Stored in Supabase.<br />JPG, PNG, WebP · max 2 MB.
+                        Stored in Cloudinary.<br />JPG, PNG, WebP · max 2 MB.
                     </p>
                 </div>
             </div>

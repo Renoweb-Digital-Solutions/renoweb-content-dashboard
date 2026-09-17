@@ -38,7 +38,7 @@ export default function AuthorManage() {
 
     const handleDelete = async (authorId) => {
         if (!authorId) return;
-        if (!window.confirm("Delete this author and remove their profile photo from Supabase?")) {
+        if (!window.confirm("Delete this author and remove their profile photo from Cloudinary?")) {
             return;
         }
 
@@ -123,7 +123,7 @@ export default function AuthorManage() {
                             <h2 className="mt-2 text-2xl font-semibold text-white">{activeAuthor ? activeAuthor.name : "Author details"}</h2>
                         </div>
                     </div>
-                    <p className="mt-3 text-sm text-gray-400">Add and update author records. Profile pictures are uploaded into Supabase and author metadata is stored in Firebase.</p>
+                    <p className="mt-3 text-sm text-gray-400">Add and update author records. Profile pictures are uploaded into Cloudinary and author metadata is stored in Firebase.</p>
                 </div>
 
                 <AuthorForm

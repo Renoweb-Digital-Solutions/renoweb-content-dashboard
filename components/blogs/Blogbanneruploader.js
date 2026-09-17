@@ -3,7 +3,7 @@
 // components/cms/blog/BlogBannerUploader.js
 // ─────────────────────────────────────────────────────────────────────────────
 // Drag-and-drop / click-to-upload banner image component.
-// Produces a local base64 preview; the actual file is uploaded to Supabase
+// Produces a local base64 preview; the actual file is uploaded to Cloudinary
 // Storage (contentimages/blog-banners/{slug}.ext) inside BlogPage.handleSave,
 // matching the same pattern used by the Case Study uploader.
 // ─────────────────────────────────────────────────────────────────────────────

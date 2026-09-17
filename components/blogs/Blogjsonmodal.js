@@ -13,7 +13,7 @@ export default function BlogJsonModal({ data, onClose }) {
 
     const exportData = {
         ...data,
-        bannerFile: data.bannerFile ? "[FILE_OBJECT — will be uploaded to Supabase]" : null,
+        bannerFile: data.bannerFile ? "[FILE_OBJECT — will be uploaded to Cloudinary]" : null,
         bannerPreview: data.bannerPreview ? "[BASE64_PREVIEW — not stored in JSON]" : null,
     };
 

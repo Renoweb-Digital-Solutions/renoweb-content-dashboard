@@ -3,7 +3,7 @@
 // components/cms/blog/BlogRichTextEditor.js
 // ─────────────────────────────────────────────────────────────────────────────
 // Self-contained rich-text editor (contenteditable + execCommand).
-// Inline images upload directly to Supabase Storage → contentimages/blog-images/
+// Inline images upload directly to Cloudinary Storage → contentimages/blog-images/
 // Props:
 //   value    {string}   — HTML string (controlled)
 //   onChange {function} — called with updated HTML on every input
@@ -12,7 +12,7 @@
 // ─────────────────────────────────────────────────────────────────────────────
 
 import { useState, useRef, useEffect } from "react";
-import { supabase } from "@/lib/supabase";
+
 
 export default function BlogRichTextEditor({ value, onChange, slug }) {
     const editorRef = useRef(null);
@@ -51,7 +51,7 @@ export default function BlogRichTextEditor({ value, onChange, slug }) {
             const el = editorRef.current?.querySelector(`[data-img-id="${imageId}"]`);
             if (!el) return;
 
-            // Just remove from DOM. Deletion from Supabase will be handled
+            // Just remove from DOM. Deletion from Cloudinary will be handled
             // during the save process by diffing the HTML.
             el.remove();
             handleInput(); // update state
@@ -125,7 +125,7 @@ export default function BlogRichTextEditor({ value, onChange, slug }) {
         } catch { return false; }
     };
 
-    // ── Image upload → Supabase ────────────────────────────────────────────────
+    // ── Image upload → Cloudinary ────────────────────────────────────────────────
 
     const handleImageFile = async (file) => {
         if (!file) return;
@@ -680,7 +680,7 @@ export default function BlogRichTextEditor({ value, onChange, slug }) {
 
             {/* ── Footer ────────────────────────────────────────────────────────── */}
             <div className="px-4 py-2 border-t border-gray-800 bg-black/20 flex items-center justify-between">
-                <span className="text-[10px] text-gray-700">Rich text · HTML output · Images → Supabase</span>
+                <span className="text-[10px] text-gray-700">Rich text · HTML output · Images → Cloudinary</span>
                 <div className="flex items-center gap-3">
                     {uploadingImage && (
                         <span className="text-[10px] text-blue-400 flex items-center gap-1.5">
