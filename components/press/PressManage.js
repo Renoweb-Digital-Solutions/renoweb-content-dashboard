@@ -7,6 +7,10 @@ export default function PressManage({ onEdit, moduleId }) {
     const [entries, setEntries] = useState([]);
     const [loading, setLoading] = useState(true);
     const [isDeleting, setIsDeleting] = useState(null);
+    const [currentPage, setCurrentPage] = useState(1);
+    const [sortBy, setSortBy] = useState("latest"); // latest, oldest, featured
+
+    const ITEMS_PER_PAGE = 6;
 
     useEffect(() => {
         const unsubscribe = subscribeToPressEntries(
@@ -75,9 +79,52 @@ export default function PressManage({ onEdit, moduleId }) {
         );
     }
 
+    // Filter and Sort Entries
+    let filteredEntries = [...entries];
+    if (sortBy === "featured") {
+        filteredEntries = filteredEntries.filter(e => e.isFeatured);
+    }
+    
+    filteredEntries.sort((a, b) => {
+        const timeA = new Date(a.date).getTime();
+        const timeB = new Date(b.date).getTime();
+        if (sortBy === "oldest") return timeA - timeB;
+        // latest (default)
+        return timeB - timeA;
+    });
+
+    // Pagination
+    const totalPages = Math.ceil(filteredEntries.length / ITEMS_PER_PAGE);
+    const paginatedEntries = filteredEntries.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE);
+
     return (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {entries.map((entry) => (
+        <div className="flex flex-col gap-6">
+            {/* Top Toolbar */}
+            <div className="flex flex-col sm:flex-row justify-between items-center bg-gray-900/40 p-3 rounded-xl border border-gray-800 gap-4">
+                <div className="text-sm text-gray-400 font-medium px-2">
+                    Showing <span className="text-white font-bold">{filteredEntries.length > 0 ? (currentPage - 1) * ITEMS_PER_PAGE + 1 : 0}</span> to <span className="text-white font-bold">{Math.min(currentPage * ITEMS_PER_PAGE, filteredEntries.length)}</span> of <span className="text-white font-bold">{filteredEntries.length}</span> entries
+                </div>
+                
+                <div className="flex items-center gap-2">
+                    <span className="text-xs text-gray-500 font-semibold uppercase tracking-wider">Sort by:</span>
+                    <select
+                        value={sortBy}
+                        onChange={(e) => {
+                            setSortBy(e.target.value);
+                            setCurrentPage(1); // Reset page on sort change
+                        }}
+                        className="bg-gray-800 text-gray-200 border border-gray-700 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2 outline-none"
+                    >
+                        <option value="latest">Latest First</option>
+                        <option value="oldest">Oldest First</option>
+                        <option value="featured">Featured Only</option>
+                    </select>
+                </div>
+            </div>
+
+            {/* Grid */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                {paginatedEntries.length > 0 ? paginatedEntries.map((entry) => (
                 <div key={entry.id} className="group relative bg-gray-900/40 border border-gray-800 rounded-2xl overflow-hidden hover:border-gray-700 transition-colors flex flex-col">
                     <div className="h-40 bg-gray-800/50 relative overflow-hidden flex-shrink-0">
                         {entry.imageUrl ? (
@@ -183,7 +230,49 @@ export default function PressManage({ onEdit, moduleId }) {
                         </div>
                     </div>
                 </div>
-            ))}
+            )) : (
+                <div className="col-span-full py-12 text-center text-gray-500 text-sm">
+                    No entries match your current filters.
+                </div>
+            )}
+            </div>
+
+            {/* Pagination Controls */}
+            {totalPages > 1 && (
+                <div className="flex items-center justify-center gap-2 mt-4">
+                    <button
+                        onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                        disabled={currentPage === 1}
+                        className="px-3 py-1.5 rounded-lg border border-gray-800 bg-gray-900/50 text-sm font-medium text-gray-400 hover:text-white hover:bg-gray-800 transition disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                        Previous
+                    </button>
+                    
+                    <div className="flex gap-1">
+                        {[...Array(totalPages)].map((_, i) => (
+                            <button
+                                key={i}
+                                onClick={() => setCurrentPage(i + 1)}
+                                className={`w-8 h-8 rounded-lg text-sm font-bold transition flex items-center justify-center ${
+                                    currentPage === i + 1
+                                    ? "bg-blue-600 text-white shadow-lg shadow-blue-500/20"
+                                    : "bg-gray-900/50 text-gray-500 hover:text-gray-200 hover:bg-gray-800 border border-gray-800"
+                                }`}
+                            >
+                                {i + 1}
+                            </button>
+                        ))}
+                    </div>
+
+                    <button
+                        onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                        disabled={currentPage === totalPages}
+                        className="px-3 py-1.5 rounded-lg border border-gray-800 bg-gray-900/50 text-sm font-medium text-gray-400 hover:text-white hover:bg-gray-800 transition disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                        Next
+                    </button>
+                </div>
+            )}
         </div>
     );
 }
