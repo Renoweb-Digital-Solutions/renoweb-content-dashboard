@@ -51,7 +51,7 @@ function DeleteConfirmModal({ entry, onCancel, onConfirm }) {
     );
 }
 
-function UpdateModal({ entry, onClose, onSave, saving }) {
+function UpdateModal({ entry, onClose, onSave, saving, moduleId }) {
     const [form, setForm] = useState({
         ...entry,
         content: entry.content || "",
@@ -179,7 +179,7 @@ function EntryCard({ entry, onDelete, onEdit }) {
     );
 }
 
-export default function ProjectsManage() {
+export default function ProjectsManage({ moduleId }) {
     const { setLoading, setSaved } = useNetwork();
     const [entries, setEntries] = useState([]);
     const [loadingData, setLoadingData] = useState(true);
@@ -191,9 +191,9 @@ export default function ProjectsManage() {
     const [successMsg, setSuccessMsg] = useState("");
     const [saving, setSaving] = useState(false);
 
-    // ── Subscribe to real-time updates ──────────────────────────────────────────
     useEffect(() => {
         const unsubscribe = subscribeToProjectEntries(
+            moduleId,
             (data) => {
                 setEntries(data);
                 setLoadingData(false);
@@ -205,7 +205,7 @@ export default function ProjectsManage() {
         );
 
         return () => unsubscribe();
-    }, []);
+    }, [moduleId]);
 
     const filteredEntries = useMemo(() => {
         return entries.filter((entry) => {
@@ -233,7 +233,7 @@ export default function ProjectsManage() {
             setSaving(true);
             setLoading(true);
 
-            const result = await saveProject(updatedEntry, {
+            const result = await saveProject(moduleId, updatedEntry, {
                 originalSlug: editEntry.slug,
                 confirmOverwrite: async () =>
                     window.confirm("A project with this slug already exists. Overwrite?"),
@@ -259,7 +259,7 @@ export default function ProjectsManage() {
     const handleDelete = async () => {
         try {
             setLoading(true);
-            await deleteProject(deleteEntry.slug);
+            await deleteProject(moduleId, deleteEntry.slug);
             setDeleteEntry(null);
             flash("Project deleted");
             setSaved(true);
@@ -390,6 +390,7 @@ export default function ProjectsManage() {
                     onClose={() => setEditEntry(null)}
                     onSave={handleSave}
                     saving={saving}
+                    moduleId={moduleId}
                 />
             )}
 

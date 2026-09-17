@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, use } from "react";
 import PressForm from "@/components/press/PressForm";
 import PressSidebarPreview from "@/components/press/PressSidebarPreview";
 import PressManage from "@/components/press/PressManage";
@@ -31,7 +31,7 @@ const initForm = () => ({
     },
 });
 
-export default function PressPage() {
+export function PressPageContent({ moduleId }) {
     const [activeTab, setActiveTab] = useState("new");
     const [form, setForm] = useState(initForm());
     const { loading, setLoading, setSaved } = useNetwork();
@@ -45,7 +45,7 @@ export default function PressPage() {
 
         setLoading(true);
         try {
-            const result = await savePress(form, form.id);
+            const result = await savePress(moduleId, form, form.id);
             if (result?.error) {
                 alert(result.error);
                 return;
@@ -145,7 +145,12 @@ export default function PressPage() {
                 </div>
             )}
 
-            {activeTab === "manage" && <PressManage onEdit={handleEdit} />}
+            {activeTab === "manage" && <PressManage moduleId={moduleId} onEdit={handleEdit} />}
         </div>
     );
+}
+
+export default function PressPage({ params }) {
+    const resolvedParams = use(params);
+    return <PressPageContent moduleId={resolvedParams.module} />;
 }

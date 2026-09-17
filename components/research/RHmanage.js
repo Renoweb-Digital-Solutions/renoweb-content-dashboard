@@ -77,7 +77,7 @@ function DeleteConfirmModal({ entry, onConfirm, onCancel }) {
 
 // ── Update Modal ──────────────────────────────────────────────────────────────
 
-function UpdateModal({ entry, onClose, onSave, saving }) {
+function UpdateModal({ entry, onClose, onSave, saving, moduleId }) {
     const [form, setForm] = useState({
         ...entry,
         content: entry.content || "",
@@ -262,7 +262,7 @@ function EntryCard({ entry, onEdit, onDelete }) {
 
 // ── Main Component ────────────────────────────────────────────────────────────
 
-export default function RHManage() {
+export default function RHManage({ moduleId }) {
     const { setLoading, setSaved } = useNetwork();
     const [entries, setEntries] = useState([]);
     const [loadingData, setLoadingData] = useState(true);
@@ -279,6 +279,7 @@ export default function RHManage() {
     // ── Subscribe to real-time updates ──────────────────────────────────────────
     useEffect(() => {
         const unsubscribe = subscribeToResearchEntries(
+            moduleId,
             (data) => {
                 setEntries(data);
                 setLoadingData(false);
@@ -290,7 +291,7 @@ export default function RHManage() {
         );
 
         return () => unsubscribe();
-    }, []);
+    }, [moduleId]);
 
     // ── Filter logic ────────────────────────────────────────────────────────
     const filtered = useMemo(() => {
@@ -313,7 +314,7 @@ export default function RHManage() {
             setSaving(true);
             setLoading(true);
             
-            const result = await saveResearch(updated, {
+            const result = await saveResearch(moduleId, updated, {
                 originalSlug: editEntry.slug,
                 confirmOverwrite: async () =>
                     window.confirm("A research entry with this slug already exists. Overwrite?"),
@@ -339,7 +340,7 @@ export default function RHManage() {
     const handleDelete = async () => {
         try {
             setLoading(true);
-            await deleteResearch(deleteEntry.slug);
+            await deleteResearch(moduleId, deleteEntry.slug);
             setDeleteEntry(null);
             flash("Research entry deleted");
             setSaved(true);
@@ -485,6 +486,7 @@ export default function RHManage() {
                     onClose={() => setEditEntry(null)}
                     onSave={handleSave}
                     saving={saving}
+                    moduleId={moduleId}
                 />
             )}
             {deleteEntry && (

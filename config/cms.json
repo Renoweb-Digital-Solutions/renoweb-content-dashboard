@@ -1,0 +1,96 @@
+{
+  "modules": [
+    {
+      "id": "renoweb",
+      "name": "Renoweb Site",
+      "description": "Main Renoweb website",
+      "submodules": ["blogs", "case_studies", "research_hub", "authors", "projects", "press"]
+    },
+    {
+      "id": "flawdits",
+      "name": "Flawdits",
+      "description": "Flawdits module",
+      "submodules": ["blogs", "case_studies"]
+    },
+    {
+      "id": "simpleade",
+      "name": "Simpleade",
+      "description": "Simpleade module",
+      "submodules": ["blogs", "case_studies"]
+    },
+    {
+      "id": "snooptel",
+      "name": "Snooptel",
+      "description": "Snooptel module",
+      "submodules": ["blogs", "case_studies"]
+    }
+  ],
+  "submodules": {
+    "case_studies": {
+      "id": "case_studies",
+      "label": "Case Studies",
+      "tag": "CONTENT",
+      "description": "Write and publish in-depth case studies with rich media, author credits, and structured narratives.",
+      "stats": [
+        { "label": "Avg. read time", "value": "6 min" },
+        { "label": "Sections", "value": "7" }
+      ],
+      "accent": "blue"
+    },
+    "blogs": {
+      "id": "blogs",
+      "label": "Blog",
+      "tag": "EDITORIAL",
+      "description": "Craft thought-leadership articles, industry insights, and educational posts with flexible layouts.",
+      "stats": [
+        { "label": "Categories", "value": "8" },
+        { "label": "Authors", "value": "3" }
+      ],
+      "accent": "blue"
+    },
+    "research_hub": {
+      "id": "research_hub",
+      "label": "Research Hub",
+      "tag": "INTELLIGENCE",
+      "description": "Publish data-backed research reports, market analyses, and whitepapers.",
+      "stats": [
+        { "label": "Report types", "value": "4" },
+        { "label": "Data fields", "value": "12+" }
+      ],
+      "accent": "blue"
+    },
+    "authors": {
+      "id": "authors",
+      "label": "Authors",
+      "tag": "PEOPLE",
+      "description": "Manage author profiles with bios, designations, and profile photos.",
+      "stats": [
+        { "label": "Profile fields", "value": "4" },
+        { "label": "Storage", "value": "Cloudinary + Firebase" }
+      ],
+      "accent": "blue"
+    },
+    "projects": {
+      "id": "projects",
+      "label": "Projects",
+      "tag": "PORTFOLIO",
+      "description": "Upload and manage company projects with a gallery and rich text descriptions.",
+      "stats": [
+        { "label": "Gallery limits", "value": "2-5 images" },
+        { "label": "Storage", "value": "Cloudinary" }
+      ],
+      "accent": "blue"
+    },
+    "press": {
+      "id": "press",
+      "label": "Press & Media",
+      "tag": "PR & MEDIA",
+      "description": "Manage external press features, media links, and news coverage.",
+      "stats": [
+        { "label": "Publishers", "value": "Tracked" },
+        { "label": "Storage", "value": "Cloudinary" }
+      ],
+      "accent": "blue"
+    }
+  }
+}

@@ -1,5 +1,6 @@
 "use client";
 
+import { use } from "react";
 import Link from "next/link";
 import cmsConfig from "@/config/cms.json";
 
@@ -136,21 +137,26 @@ function QuickActionButton({ action }) {
 }
 
 // ── Main component ────────────────────────────────────────────────────────────
-export default function Dashboard() {
-  const sections = cmsConfig.modules.map((mod) => {
+export default function Dashboard({ params }) {
+  const resolvedParams = use(params);
+  const moduleId = resolvedParams.module;
+  const moduleConfig = cmsConfig.modules.find((m) => m.id === moduleId);
+
+  if (!moduleConfig) {
+    return <div className="p-8 text-white">Module not found</div>;
+  }
+
+  const sections = moduleConfig.submodules.map((submoduleId) => {
+    const config = cmsConfig.submodules[submoduleId];
     return {
-      id: mod.id,
-      label: mod.name,
-      tag: "MODULE",
-      description: mod.description,
-      href: `/cms/${mod.id}/dashboard`,
+      ...config,
+      href: `/cms/${moduleId}/${submoduleId}`,
       status: "live",
-      accent: "indigo",
     };
   });
 
   const quickActions = sections.map((s) => ({
-    label: `Go to ${s.label}`,
+    label: `New ${s.label}`,
     href: s.href,
   }));
 
@@ -168,13 +174,13 @@ export default function Dashboard() {
         <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-8 mb-4">
           <div>
             <h1 className="text-4xl sm:text-5xl font-extrabold text-white tracking-tight leading-[1.1] mb-4">
-              Organization{" "}
-              <span className="text-indigo-400">Modules</span>
+              {moduleConfig.name}{" "}
+              <span className="text-blue-400">Content</span>
               <br />
-              Dashboard
+              Operations Hub
             </h1>
             <p className="text-base text-gray-500 max-w-xl leading-relaxed">
-              Select an application module to manage its content — case studies, blogs, research, and more.
+              {moduleConfig.description}. Build, preview, and publish with one workflow.
             </p>
           </div>
 

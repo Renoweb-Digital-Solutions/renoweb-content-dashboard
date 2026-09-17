@@ -189,7 +189,7 @@ function EntryCard({ entry, onDelete, onEdit }) {
     );
 }
 
-export default function BlogManage() {
+export default function BlogManage({ moduleId }) {
     const { setLoading, setSaved } = useNetwork();
     const [entries, setEntries] = useState([]);
     const [loadingData, setLoadingData] = useState(true);
@@ -204,6 +204,7 @@ export default function BlogManage() {
     // ── Subscribe to real-time updates ──────────────────────────────────────────
     useEffect(() => {
         const unsubscribe = subscribeToBlogEntries(
+            moduleId,
             (data) => {
                 setEntries(data);
                 setLoadingData(false);
@@ -215,7 +216,7 @@ export default function BlogManage() {
         );
 
         return () => unsubscribe();
-    }, []);
+    }, [moduleId]);
 
     const filteredEntries = useMemo(() => {
         return entries.filter((entry) => {
@@ -243,7 +244,7 @@ export default function BlogManage() {
             setSaving(true);
             setLoading(true);
 
-            const result = await saveBlog(updatedEntry, {
+            const result = await saveBlog(moduleId, updatedEntry, {
                 originalSlug: editEntry.slug,
                 confirmOverwrite: async () =>
                     window.confirm("A blog post with this slug already exists. Overwrite?"),
@@ -269,7 +270,7 @@ export default function BlogManage() {
     const handleDelete = async () => {
         try {
             setLoading(true);
-            await deleteBlog(deleteEntry.slug);
+            await deleteBlog(moduleId, deleteEntry.slug);
             setDeleteEntry(null);
             flash("Blog post deleted");
             setSaved(true);

@@ -5,8 +5,8 @@ import { deleteAuthor, saveAuthor } from "@/lib/authors";
 import { useAuthors } from "./useAuthors";
 import AuthorForm from "./AuthorForm";
 
-export default function AuthorManage() {
-    const authors = useAuthors();
+export default function AuthorManage({ moduleId }) {
+    const authors = useAuthors(moduleId);
     const [activeAuthor, setActiveAuthor] = useState(null);
     const [isSaving, setIsSaving] = useState(false);
     const [isDeleting, setIsDeleting] = useState(false);
@@ -23,7 +23,7 @@ export default function AuthorManage() {
         setFeedback("");
 
         try {
-            const saved = await saveAuthor(authorPayload);
+            const saved = await saveAuthor(moduleId, authorPayload);
             if (!creatingNew) {
                 setActiveAuthor(saved);
             }
@@ -46,7 +46,7 @@ export default function AuthorManage() {
         setFeedback("");
 
         try {
-            await deleteAuthor(authorId);
+            await deleteAuthor(moduleId, authorId);
             if (activeAuthor?.id === authorId) {
                 setActiveAuthor(null);
             }

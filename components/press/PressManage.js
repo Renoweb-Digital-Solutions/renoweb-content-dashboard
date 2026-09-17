@@ -3,13 +3,14 @@
 import { useEffect, useState } from "react";
 import { deletePress, subscribeToPressEntries, toggleFeaturedPress } from "@/lib/press";
 
-export default function PressManage({ onEdit }) {
+export default function PressManage({ onEdit, moduleId }) {
     const [entries, setEntries] = useState([]);
     const [loading, setLoading] = useState(true);
     const [isDeleting, setIsDeleting] = useState(null);
 
     useEffect(() => {
         const unsubscribe = subscribeToPressEntries(
+            moduleId,
             (data) => {
                 setEntries(data);
                 setLoading(false);
@@ -20,14 +21,14 @@ export default function PressManage({ onEdit }) {
             }
         );
         return () => unsubscribe();
-    }, []);
+    }, [moduleId]);
 
     const handleDelete = async (id) => {
         if (!window.confirm("Are you sure you want to delete this press entry? This cannot be undone.")) return;
         
         setIsDeleting(id);
         try {
-            await deletePress(id);
+            await deletePress(moduleId, id);
         } catch (err) {
             alert("Failed to delete entry: " + err.message);
         } finally {
@@ -37,7 +38,7 @@ export default function PressManage({ onEdit }) {
 
     const handleToggleFeatured = async (entry) => {
         try {
-            await toggleFeaturedPress(entry.id, entry.isFeatured);
+            await toggleFeaturedPress(moduleId, entry.id, entry.isFeatured);
         } catch (err) {
             console.error(err);
             alert("Failed to toggle featured status");

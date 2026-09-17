@@ -1,8 +1,12 @@
 "use client";
 
+import { use } from "react";
 import AuthorManage from "@/components/authors/AuthorManage";
 
-export default function AuthorsPage() {
+export default function AuthorsPage({ params }) {
+    const resolvedParams = use(params);
+    const moduleId = resolvedParams.module;
+
     return (
         <div className="min-h-screen bg-black text-white">
             <div className="mx-auto max-w-7xl px-6 py-10">
@@ -21,7 +25,7 @@ export default function AuthorsPage() {
                     </div>
                 </div>
 
-                <AuthorManage />
+                <AuthorManage moduleId={moduleId} />
             </div>
         </div>
     );

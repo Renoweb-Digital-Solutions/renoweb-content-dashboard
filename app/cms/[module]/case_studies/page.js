@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, use } from "react";
 
 import CaseStudyForm from "@/components/case_studies/CaseStudyForm";
 import CaseStudyManage from "@/components/case_studies/CaseStudyManage";
@@ -10,7 +10,7 @@ import { initCaseStudyForm } from "@/components/constants";
 import { saveCaseStudy } from "@/lib/caseStudies";
 import { useNetwork } from "@/lib/networkContext";
 
-export function CaseStudiesPageContent({ initialTab = "new" }) {
+export function CaseStudiesPageContent({ initialTab = "new", moduleId }) {
     const [activeTab, setActiveTab] = useState(initialTab);
     const [form, setForm] = useState(initCaseStudyForm());
     const [showJson, setShowJson] = useState(false);
@@ -26,7 +26,7 @@ export function CaseStudiesPageContent({ initialTab = "new" }) {
         try {
             setLoading(true);
 
-            const result = await saveCaseStudy(form, {
+            const result = await saveCaseStudy(moduleId, form, {
                 confirmOverwrite: async () => window.confirm("A case study with this slug already exists. Overwrite?"),
             });
 
@@ -97,7 +97,7 @@ export function CaseStudiesPageContent({ initialTab = "new" }) {
                     </div>
                 )}
 
-                {activeTab === "manage" && <CaseStudyManage />}
+                {activeTab === "manage" && <CaseStudyManage moduleId={moduleId} />}
             </div>
 
             {showJson && (
@@ -110,6 +110,7 @@ export function CaseStudiesPageContent({ initialTab = "new" }) {
     );
 }
 
-export default function CaseStudies() {
-    return <CaseStudiesPageContent />;
+export default function CaseStudies({ params }) {
+    const resolvedParams = use(params);
+    return <CaseStudiesPageContent moduleId={resolvedParams.module} />;
 }

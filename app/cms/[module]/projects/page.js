@@ -1,29 +1,28 @@
 "use client";
 
-// Entry point for the Blog CMS tab. Owns all state; every child is prop-driven.
+// Entry point for the Projects CMS tab. Owns all state; every child is prop-driven.
 
-import { useState } from "react";
+import { useState, use } from "react";
 
-import BlogForm from "@/components/blogs/Blogform";
-import BlogManage from "@/components/blogs/Blogmanage";
-import BlogSidebarPreview from "@/components/blogs/Blogsidebarpreview";
-import BlogJsonModal from "@/components/blogs/Blogjsonmodal";
-import { initBlogForm } from "@/components/blogs/Blogconstants";
+import ProjectsForm from "@/components/projects/ProjectsForm";
+import ProjectsManage from "@/components/projects/ProjectsManage";
+import ProjectsSidebarPreview from "@/components/projects/ProjectsSidebarPreview";
+import ProjectsJsonModal from "@/components/projects/ProjectsJsonModal";
+import { initProjectForm } from "@/components/projects/ProjectsConstants";
 
 import { useNetwork } from "@/lib/networkContext";
-import { saveBlog, validateBlogForm } from "@/lib/blogs";
+import { saveProject, validateProjectForm } from "@/lib/projects";
 
-
-export function BlogPageContent({ initialTab = "new" }) {
+export function ProjectsPageContent({ initialTab = "new", moduleId }) {
     const [activeTab, setActiveTab] = useState(initialTab);
-    const [form, setForm] = useState(initBlogForm());
+    const [form, setForm] = useState(initProjectForm());
     const [showJson, setShowJson] = useState(false);
 
     const { loading, setLoading, setSaved } = useNetwork();
 
     // ── Save / Publish ──────────────────────────────────────────────────────────
     const handleSave = async () => {
-        const error = validateBlogForm(form);
+        const error = validateProjectForm(form);
         if (error) {
             alert(error);
             return;
@@ -32,9 +31,9 @@ export function BlogPageContent({ initialTab = "new" }) {
         try {
             setLoading(true);
 
-            const result = await saveBlog(form, {
+            const result = await saveProject(moduleId, form, {
                 confirmOverwrite: async () =>
-                    window.confirm("A blog post with this slug already exists. Overwrite?"),
+                    window.confirm("A project with this slug already exists. Overwrite?"),
             });
 
             if (result?.error) {
@@ -47,11 +46,11 @@ export function BlogPageContent({ initialTab = "new" }) {
             }
 
             setSaved(true);
-            setForm(initBlogForm());
+            setForm(initProjectForm());
             setTimeout(() => setSaved(false), 3000);
         } catch (err) {
             console.error(err);
-            alert(err.message || "Failed to publish blog post. Check console.");
+            alert(err.message || "Failed to publish project. Check console.");
         } finally {
             setLoading(false);
         }
@@ -60,7 +59,7 @@ export function BlogPageContent({ initialTab = "new" }) {
     // ── Reset ───────────────────────────────────────────────────────────────────
     const handleReset = () => {
         if (window.confirm("Reset all fields? This cannot be undone.")) {
-            setForm(initBlogForm());
+            setForm(initProjectForm());
         }
     };
 
@@ -78,7 +77,7 @@ export function BlogPageContent({ initialTab = "new" }) {
                     <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
                     </svg>
-                    New Entry
+                    New Project
                 </button>
                 <button
                     onClick={() => setActiveTab("manage")}
@@ -90,36 +89,34 @@ export function BlogPageContent({ initialTab = "new" }) {
                     <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 10h16M4 14h16M4 18h16" />
                     </svg>
-                    Manage Blogs
+                    Manage Projects
                 </button>
             </div>
 
             {activeTab === "new" && (
                 <div className="grid grid-cols-1 gap-10 lg:grid-cols-[1fr_360px]">
+                    {/* Left — form */}
+                    <ProjectsForm
+                        form={form}
+                        setForm={setForm}
+                        onReset={handleReset}
+                    />
 
-            {/* Left — form */}
-            <BlogForm
-                form={form}
-                setForm={setForm}
-                onReset={handleReset}
-            />
-
-            {/* Right — sidebar */}
-            <BlogSidebarPreview
-                form={form}
-                onPreviewJson={() => setShowJson(true)}
-                onSave={handleSave}
-                loading={loading}
-            />
-
+                    {/* Right — sidebar */}
+                    <ProjectsSidebarPreview
+                        form={form}
+                        onPreviewJson={() => setShowJson(true)}
+                        onSave={handleSave}
+                        loading={loading}
+                    />
                 </div>
             )}
 
-            {activeTab === "manage" && <BlogManage />}
+            {activeTab === "manage" && <ProjectsManage moduleId={moduleId} />}
 
             {/* JSON modal */}
             {showJson && (
-                <BlogJsonModal
+                <ProjectsJsonModal
                     data={form}
                     onClose={() => setShowJson(false)}
                 />
@@ -128,6 +125,7 @@ export function BlogPageContent({ initialTab = "new" }) {
     );
 }
 
-export default function BlogPage() {
-    return <BlogPageContent />;
+export default function ProjectsPage({ params }) {
+    const resolvedParams = use(params);
+    return <ProjectsPageContent moduleId={resolvedParams.module} />;
 }

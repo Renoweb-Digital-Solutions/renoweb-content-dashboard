@@ -10,7 +10,7 @@
 // credentials are ready (same pattern as BlogPage).
 // ─────────────────────────────────────────────────────────────────────────────
 
-import { useState } from "react";
+import { useState, use } from "react";
 
 import RHForm from "@/components/research/RHform";
 import RHJsonModal from "@/components/research/RHjsonmodal";
@@ -21,7 +21,7 @@ import { saveResearch } from "@/lib/research";
 import { useNetwork } from "@/lib/networkContext";
 
 
-export default function ResearchHubPage() {
+export function ResearchHubPageContent({ moduleId }) {
     const [activeTab, setActiveTab] = useState("new"); // "new" | "manage"
     const [form, setForm] = useState(initRHForm());
     const [showJson, setShowJson] = useState(false);
@@ -40,7 +40,7 @@ export default function ResearchHubPage() {
     const handleSave = async () => {
         setLoading(true);
         try {
-            const result = await saveResearch(form, {
+            const result = await saveResearch(moduleId, form, {
                 confirmOverwrite: async () => window.confirm("A research entry with this slug already exists. Overwrite?"),
             });
 
@@ -135,7 +135,7 @@ export default function ResearchHubPage() {
             )}
 
             {/* ── Manage Tab ───────────────────────────────────────────────────── */}
-            {activeTab === "manage" && <RHManage />}
+            {activeTab === "manage" && <RHManage moduleId={moduleId} />}
 
             {/* ── JSON Modal ───────────────────────────────────────────────────── */}
             {showJson && (
@@ -144,4 +144,9 @@ export default function ResearchHubPage() {
             </div>
         </div>
     );
+}
+
+export default function ResearchHubPage({ params }) {
+    const resolvedParams = use(params);
+    return <ResearchHubPageContent moduleId={resolvedParams.module} />;
 }

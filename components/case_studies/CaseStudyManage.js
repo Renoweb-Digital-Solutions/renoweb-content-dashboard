@@ -67,7 +67,7 @@ function DeleteConfirmModal({ entry, onCancel, onConfirm, deleting }) {
     );
 }
 
-function UpdateModal({ entry, onClose, onSaved }) {
+function UpdateModal({ entry, onClose, onSaved, moduleId }) {
     const [form, setForm] = useState(() => caseStudyEntryToForm(entry));
     const [saving, setSaving] = useState(false);
 
@@ -83,7 +83,7 @@ function UpdateModal({ entry, onClose, onSaved }) {
         try {
             setSaving(true);
 
-            const result = await saveCaseStudy(form, {
+            const result = await saveCaseStudy(moduleId, form, {
                 originalId: entry.id,
                 confirmOverwrite: async () => window.confirm("A case study with this slug already exists. Overwrite?"),
             });
@@ -226,7 +226,7 @@ function EntryCard({ entry, onEdit, onDelete }) {
     );
 }
 
-export default function CaseStudyManage() {
+export default function CaseStudyManage({ moduleId }) {
     const [entries, setEntries] = useState([]);
     const [search, setSearch] = useState("");
     const [category, setCategory] = useState("");
@@ -239,6 +239,7 @@ export default function CaseStudyManage() {
 
     useEffect(() => {
         const unsubscribe = subscribeToCaseStudies(
+            moduleId,
             (nextEntries) => {
                 setEntries(nextEntries);
                 setLoading(false);
@@ -250,7 +251,7 @@ export default function CaseStudyManage() {
         );
 
         return unsubscribe;
-    }, []);
+    }, [moduleId]);
 
     const filteredEntries = useMemo(() => {
         return entries.filter((entry) => {
@@ -280,7 +281,7 @@ export default function CaseStudyManage() {
 
         try {
             setDeleting(true);
-            await deleteCaseStudy(deleteEntry.id);
+            await deleteCaseStudy(moduleId, deleteEntry.id);
             flash("Case study deleted");
         } catch (error) {
             console.error(error);
@@ -393,6 +394,7 @@ export default function CaseStudyManage() {
                     entry={editEntry}
                     onClose={() => setEditEntry(null)}
                     onSaved={flash}
+                    moduleId={moduleId}
                 />
             )}
 
